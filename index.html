@@ -544,6 +544,9 @@
 
         function votarBranco() {
             numeroDigitado = 'BR';
+            
+            tocarSomUrna();
+
             document.getElementById('candidatoInfo').innerHTML = `
                 <p style="color: var(--color-display-text); text-align: center; font-size: 1.3rem; font-weight: bold;">
                     VOTO EM BRANCO
