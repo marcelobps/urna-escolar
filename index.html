@@ -432,7 +432,7 @@
         // Base de dados dos candidatos
         const candidatos = [
             // 6º Ano A
-            { numero: '10', nome: 'Theo', turma: 'Cachorro Muleke', foto: 'Theo.jpg' },
+            { numero: '10', nome: 'Ana Silva', turma: '6º Ano A', foto: 'https://i.pravatar.cc/150?img=1' },
             { numero: '11', nome: 'Bruno Costa', turma: '6º Ano A', foto: 'https://i.pravatar.cc/150?img=12' },
             { numero: '12', nome: 'Carla Souza', turma: '6º Ano A', foto: 'https://i.pravatar.cc/150?img=5' },
             
@@ -492,7 +492,6 @@
             audio.play();
 }
 
-
         function digitarNumero(num) {
             if (numeroDigitado.length < 2) {
                 numeroDigitado += num;
@@ -544,16 +543,12 @@
 
         function votarBranco() {
             numeroDigitado = 'BR';
-            
-            tocarSomUrna();
-
+            atualizarDisplay();
             document.getElementById('candidatoInfo').innerHTML = `
                 <p style="color: var(--color-display-text); text-align: center; font-size: 1.3rem; font-weight: bold;">
                     VOTO EM BRANCO
                 </p>
             `;
-            document.getElementById('digito1').textContent = '';
-            document.getElementById('digito2').textContent = '';
         }
 
         function confirmar() {
@@ -623,6 +618,18 @@
 
             let html = '';
             
+            // Mostrar votos em branco no topo (se houver)
+            const votosBrancos = contagemVotos['BR'] || 0;
+            html += `
+                <div class="turma-resultado">
+                    <h3>📄 Votos em Branco</h3>
+                    <div class="candidato-resultado">
+                        <span class="candidato-resultado-nome">Branco</span>
+                        <span class="candidato-resultado-votos">${votosBrancos} voto${votosBrancos !== 1 ? 's' : ''}</span>
+                    </div>
+                </div>
+            `;
+            
             Object.keys(turmas).sort().forEach(turma => {
                 const candidatosTurma = turmas[turma].sort((a, b) => b.votos - a.votos);
                 const maxVotos = candidatosTurma[0]?.votos || 0;
@@ -649,19 +656,6 @@
                 
                 html += `</div>`;
             });
-
-            const votosBrancos = contagemVotos['BR'] || 0;
-            if (votosBrancos > 0) {
-                html += `
-                    <div class="turma-resultado">
-                        <h3>Votos em Branco</h3>
-                        <div class="candidato-resultado">
-                            <span class="candidato-resultado-nome">Branco</span>
-                            <span class="candidato-resultado-votos">${votosBrancos} voto${votosBrancos !== 1 ? 's' : ''}</span>
-                        </div>
-                    </div>
-                `;
-            }
 
             html += `
                 <div style="text-align: center; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
