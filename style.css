@@ -1,0 +1,321 @@
+:root {
+    --color-bg-primary: #f5f5f5;
+    --color-urna-body: #dadada;
+    --color-urna-border: #888;
+    --color-display-bg: #e8e8e8;
+    --color-btn-branco: #ffffff;
+    --color-btn-corrige: #ff6600;
+    --color-btn-confirma: #00cc00;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.header h1 { 
+    color: white; 
+    margin-bottom: 20px; 
+    font-size: 1.8rem; 
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3); 
+}
+
+/* --- CONTAINER DA URNA --- */
+.urna-container {
+    background: var(--color-urna-body);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+    display: flex;
+    gap: 30px;
+    width: 100%;
+    max-width: 1100px; /* Bem largo */
+    border: 2px solid var(--color-urna-border);
+    position: relative;
+}
+
+/* --- TELA (LAYOUT PROFISSIONAL DIVIDIDO) --- */
+.display-section {
+    flex: 1.5;
+    background: linear-gradient(to bottom, #f5f5f5, #e0e0e0);
+    border: 4px solid #888;
+    height: 450px; /* Altura fixa para layout consistente */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 20px 20px 10px 20px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+
+.display-main {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* LADO ESQUERDO (TEXTOS) */
+.display-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.display-header { font-size: 0.9rem; margin-bottom: 15px; font-weight: bold; }
+.cargo-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 25px; text-transform: uppercase; width: 100%; text-align: center; }
+
+.numero-wrapper {
+    display: flex; align-items: center; gap: 15px; margin-bottom: 20px;
+}
+.info-label { font-size: 0.9rem; font-weight: bold; }
+
+.numero-boxes { display: flex; gap: 5px; }
+.numero-box {
+    width: 45px; height: 60px;
+    border: 1px solid #000;
+    font-size: 2.2rem; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    background: white;
+}
+
+/* DADOS DO CANDIDATO */
+.candidato-dados { width: 100%; display: none; margin-top: 15px; }
+.info-linha { margin-bottom: 12px; font-size: 1.1rem; }
+.info-valor { font-weight: bold; font-size: 1.4rem; text-transform: uppercase; margin-left: 5px; }
+
+/* LADO DIREITO (FOTO) */
+.display-right {
+    width: 150px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+.moldura-foto {
+    width: 140px; height: 185px;
+    border: 1px solid #000;
+    background: #ccc;
+    display: none;
+    box-shadow: 3px 3px 5px rgba(0,0,0,0.2);
+}
+.moldura-foto img { width: 100%; height: 100%; object-fit: cover; }
+
+/* MENSAGENS ESPECIAIS */
+.mensagem-voto-nulo, .mensagem-voto-branco {
+    display: none; font-size: 2rem; margin-top: 40px; 
+    text-align: center; font-weight: bold; 
+    width: 100%; animation: piscar 1.5s infinite;
+}
+
+/* RODAPÉ (INSTRUÇÕES) */
+.display-footer {
+    height: 90px;
+    font-size: 0.9rem;
+    color: #333;
+    display: none;
+    margin-top: auto;
+}
+.footer-divisor { width: 100%; height: 2px; background: #555; margin-bottom: 8px; }
+.tecla-verde { color: #008800; font-weight: bold; }
+.tecla-laranja { color: #cc5200; font-weight: bold; }
+
+/* TELA DE FIM */
+.tela-fim {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: #e8e8e8; display: none;
+    align-items: center; justify-content: center;
+    font-size: 6rem; font-weight: bold; z-index: 10;
+}
+
+/* --- TECLADO (ESTILO ESCURO/GRADIENTE) --- */
+.teclado-section {
+    flex: 1;
+    background: #2a2a2a; /* Fundo escuro */
+    padding: 30px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.teclado-numerico {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.btn {
+    border: none; border-radius: 5px; cursor: pointer;
+    font-weight: bold; transition: transform 0.1s;
+    box-shadow: 3px 3px 0px #000;
+    color: white;
+}
+.btn:active { transform: translateY(2px); box-shadow: none; }
+
+.btn-numero {
+    padding: 15px 25px;
+    font-size: 1.5rem;
+    background: linear-gradient(to bottom, #444, #222);
+    border: 1px solid #555;
+}
+.btn-zero { grid-column: 2; }
+
+/* BOTÕES DE AÇÃO (ESTILO ANTIGO) */
+.acoes-teclado {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+}
+
+.acoes-teclado .btn {
+    flex: 1;
+    height: 60px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #1a1a1a;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding-top: 8px;
+}
+
+.btn-branco { background: var(--color-btn-branco); border-top: 4px solid #ccc; }
+.btn-corrige { background: var(--color-btn-corrige); border-top: 4px solid #cc5200; color: white !important;}
+
+/* Botão confirma mais alto */
+.btn-confirma { 
+    background: var(--color-btn-confirma); 
+    border-top: 4px solid #008800; 
+    height: 70px !important; 
+    margin-top: -10px; 
+    font-size: 1rem !important; 
+    color: white !important;
+    display: flex; align-items: center !important; /* Centralizar texto vert. */
+}
+
+/* --- RESULTADOS (MODAL OCULTO) --- */
+.resultados-container {
+    display: none; /* ESCONDIDO POR PADRÃO */
+    position: fixed; 
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: white; 
+    width: 90%; max-width: 600px;
+    max-height: 90vh; overflow-y: auto;
+    border-radius: 10px; padding: 30px;
+    box-shadow: 0 0 100px rgba(0,0,0,0.8);
+    z-index: 100;
+}
+.resultados-container.ativo { display: block; }
+
+.candidato-resultado {
+    display: flex; justify-content: space-between;
+    padding: 10px; border-bottom: 1px solid #eee;
+}
+.candidato-resultado.vencedor { background: #e8f5e9; border: 2px solid #4caf50; border-radius: 5px; }
+
+.resultados-acoes { display: flex; gap: 10px; margin-top: 20px; }
+.btn-voltar, .btn-resetar { flex: 1; padding: 15px; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; }
+.btn-voltar { background: #667eea; }
+.btn-resetar { background: #dc3545; }
+
+/* --- BOTÃO DE ADMIN (Cadeado) --- */
+.admin-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s;
+    z-index: 50;
+}
+.admin-btn:hover { background: #000; transform: scale(1.1); }
+
+@keyframes piscar { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+
+/* Responsividade */
+@media (max-width: 900px) {
+    .urna-container { flex-direction: column; padding: 15px; }
+    .display-section { height: 380px; }
+    .candidato-foto { width: 100px; height: 140px; }
+}
+
+@media (max-width: 480px) {
+    .acoes-teclado .btn { font-size: 0.7rem; }
+    .display-main { flex-direction: column; }
+    .display-right { display: none; } /* Esconde foto em celular muito pequeno */
+}
+
+/* --- MODAL DE SENHA (SECURE) --- */
+.modal-senha-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85); /* Fundo bem escuro */
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+}
+
+.modal-senha-box {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 2px solid #667eea;
+}
+
+.modal-senha-box h3 { color: #333; margin-bottom: 15px; font-size: 1.5rem; }
+.modal-senha-box p { color: #666; margin-bottom: 20px; }
+
+#inputSenhaAdmin {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2rem;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+    outline: none;
+}
+
+#inputSenhaAdmin:focus { border-color: #667eea; }
+
+.modal-botoes { display: flex; gap: 10px; justify-content: center; }
+
+.modal-botoes button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: 0.2s;
+}
+
+.btn-entrar { background: #00cc00; color: white; flex: 1; }
+.btn-entrar:hover { background: #00aa00; }
+
+.btn-cancelar { background: #dc3545; color: white; flex: 1; }
+.btn-cancelar:hover { background: #c82333; }
