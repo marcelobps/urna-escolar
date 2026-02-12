@@ -163,7 +163,7 @@ const candidatos = [
 
     // 3º MINERAÇÃO
     { 
-        numero: '03', 
+        numero: '07', 
         nome: 'BRENNO KAYKY ARAUJO', 
         turma: '3º Mineração', 
         foto: 'img/default_boy.png' 
