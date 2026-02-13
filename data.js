@@ -36,7 +36,7 @@ const candidatos = [
         numero: '02', 
         nome: 'BIANCA HENRIQUE BARBOSA', 
         turma: '1ª Série A', 
-        foto: 'img/default_girl.png' 
+        foto: 'https://sesigoias.sharepoint.com/:i:/s/ProfessoresCinciasHumanas/IQD0FhoRlazrRKrt0kIolOU8AeNNGL-vMetQSEnUcqxH3nc?e=LWJkw4' 
     },
     { 
         numero: '14', 
