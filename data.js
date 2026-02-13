@@ -36,7 +36,7 @@ const candidatos = [
         numero: '02', 
         nome: 'BIANCA HENRIQUE BARBOSA', 
         turma: '1ª Série A', 
-        foto: 'https://sesigoias.sharepoint.com/:i:/s/ProfessoresCinciasHumanas/IQD0FhoRlazrRKrt0kIolOU8AeNNGL-vMetQSEnUcqxH3nc?e=LWJkw4' 
+        foto: 'img/foto_02.jpg' 
     },
     { 
         numero: '14', 
@@ -84,7 +84,7 @@ const candidatos = [
         numero: '23', 
         nome: 'MARIA GABRIELA SOUZA LEMOS', 
         turma: '1ª Série C', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_23.jpg' 
     },
 
     // 2º AUTOMAÇÃO
@@ -92,7 +92,7 @@ const candidatos = [
         numero: '22', 
         nome: 'LAURA ZANINI DE FREITAS PONTES', 
         turma: '2º Automação', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_22.jpg' 
     },
     { 
         numero: '25', 
@@ -104,7 +104,7 @@ const candidatos = [
         numero: '28', 
         nome: 'MATEUS RECH JOANUCCI', 
         turma: '2º Automação', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_28.jpg' 
     },
 
     // 2º MINERAÇÃO
@@ -132,7 +132,7 @@ const candidatos = [
         numero: '03', 
         nome: 'CALISMAR REBEIRO FILHO', 
         turma: '2º Eletromecânica', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_03.jpg' 
     },
     { 
         numero: '10', 
@@ -158,7 +158,7 @@ const candidatos = [
         numero: '29', 
         nome: 'MIGUEL PEREIRA DA SILVA', 
         turma: '3º Internet das Coisas', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_29.jpg' 
     },
 
     // 3º MINERAÇÃO
