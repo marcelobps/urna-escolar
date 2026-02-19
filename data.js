@@ -180,7 +180,144 @@ const candidatos = [
         turma: '3º Mineração', 
         foto: 'img/foto_27.jpeg' 
     },
+    
+    // 6º ANO A
     { 
-        // adicione outros aqui...
+        numero: '81',
+        nome: 'ESTER CAROLINE FERREIRA SILVA',
+        turma: '6º Ano A',
+        foto: 'img/'
+    },
+    { 
+        numero: '74',
+        nome: 'ESTER SOUZA MENDES',
+        turma: '6º Ano A',
+        foto: 'img/'
+    },
+    { 
+        numero: '54',
+        nome: 'HELOÍSA RAFAEL BORGES',
+        turma: '6º Ano A',
+        foto: 'img/'
+    },
+
+    // 6º ANO B
+    { 
+        numero: '53',
+        nome: 'ANNABELLE CESAR DA SILVA',
+        turma: '6º Ano B',
+        foto: 'img/'
+    },
+    { 
+        numero: '62',
+        nome: 'LEONARDO F. DA SILVA OLIVEIRA',
+        turma: '6º Ano B',
+        foto: 'img/'
+    },
+    { 
+        numero: '47',
+        nome: 'SOPHIA ALENCAR BERNADES',
+        turma: '6º Ano B',
+        foto: 'img/'
+    },
+    
+    // 7º ANO A
+    { 
+        numero: '38',
+        nome: 'EMANUEL FERREIRA MENEZES',
+        turma: '7º Ano A',
+        foto: 'img/'
+    },
+    { 
+        numero: '40',
+        nome: 'ENZO BERNADO DUARTE',
+        turma: '7º Ano A',
+        foto: 'img/'
+    },
+    { 
+        numero: '43',
+        nome: 'ENZO BUZINARO PANSERA',
+        turma: '7º Ano A',
+        foto: 'img/'
+    },
+
+    // 7º ANO B
+    { 
+        numero: '72',
+        nome: 'DAVI LUCAS AMARAL ROCHA',
+        turma: '7º Ano B',
+        foto: 'img/'
+    },
+    { 
+        numero: '68',
+        nome: 'DAVI LUCCA PAULISTA DA COSTA',
+        turma: '7º Ano B',
+        foto: 'img/'
+    },
+    { 
+        numero: '49',
+        nome: 'SOPHYA GONÇALVES MELO',
+        turma: '7º Ano B',
+        foto: 'img/'
+    },
+
+    // 8º ANO
+    { 
+        numero: '65',
+        nome: 'DERIK TRINDADE DE OLVEIRA',
+        turma: '8º Ano',
+        foto: 'img/'
+    },
+    { 
+        numero: '42',
+        nome: 'MIGUEL ANTONIO RABELO IDALINO',
+        turma: '8º Ano',
+        foto: 'img/'
+    },
+    { 
+        numero: '30',
+        nome: 'VITÓRIA SPINA SANTOS',
+        turma: '8º Ano',
+        foto: 'img/'
+    },
+
+    // 9º ANO A
+    { 
+        numero: '52',
+        nome: 'GUILHERME PODVERSIC COSTA REZENDE',
+        turma: '9º Ano A',
+        foto: 'img/'
+    },
+    { 
+        numero: '41',
+        nome: 'LUISA FAUSTINO ALMEIDA CAMPOS',
+        turma: '9º Ano A',
+        foto: 'img/'
+    },
+    { 
+        numero: '37',
+        nome: 'PABLO HENRIQUE CORREIA PACHECO',
+        turma: '9º Ano A',
+        foto: 'img/'
+    },
+
+    // 9º ANO B
+    { 
+        numero: '44',
+        nome: 'GABRIELA RODRIGUES MACEDO',
+        turma: '9º Ano B',
+        foto: 'img/'
+    },
+    { 
+        numero: '73',
+        nome: 'IZABELLY GREGORIO DIAS',
+        turma: '9º Ano B',
+        foto: 'img/'
+    },
+    { 
+        numero: '48',
+        nome: 'MARIA EDUARDA ROSA',
+        turma: '9º Ano B',
+        foto: 'img/'
     },
 ];
