@@ -186,19 +186,19 @@ const candidatos = [
         numero: '81',
         nome: 'ESTER CAROLINE FERREIRA SILVA',
         turma: '6º Ano A',
-        foto: 'img/'
+        foto: 'img/foto_6anoA.png'
     },
     { 
         numero: '74',
         nome: 'ESTER SOUZA MENDES',
         turma: '6º Ano A',
-        foto: 'img/'
+        foto: 'img/foto_6anoA.png'
     },
     { 
         numero: '54',
         nome: 'HELOÍSA RAFAEL BORGES',
         turma: '6º Ano A',
-        foto: 'img/'
+        foto: 'img/foto_6anoA.png'
     },
 
     // 6º ANO B
@@ -206,19 +206,19 @@ const candidatos = [
         numero: '53',
         nome: 'ANNABELLE CESAR DA SILVA',
         turma: '6º Ano B',
-        foto: 'img/'
+        foto: 'img/foto_6anoB.png'
     },
     { 
         numero: '62',
         nome: 'LEONARDO F. DA SILVA OLIVEIRA',
         turma: '6º Ano B',
-        foto: 'img/'
+        foto: 'img/foto_6anoB.png'
     },
     { 
         numero: '47',
         nome: 'SOPHIA ALENCAR BERNADES',
         turma: '6º Ano B',
-        foto: 'img/'
+        foto: 'img/foto_6anoB.png'
     },
     
     // 7º ANO A
@@ -226,19 +226,19 @@ const candidatos = [
         numero: '38',
         nome: 'EMANUEL FERREIRA MENEZES',
         turma: '7º Ano A',
-        foto: 'img/'
+        foto: 'img/foto_7anoA.png'
     },
     { 
         numero: '40',
         nome: 'ENZO BERNADO DUARTE',
         turma: '7º Ano A',
-        foto: 'img/'
+        foto: 'img/foto_7anoA.png'
     },
     { 
         numero: '43',
         nome: 'ENZO BUZINARO PANSERA',
         turma: '7º Ano A',
-        foto: 'img/'
+        foto: 'img/foto_7anoA.png'
     },
 
     // 7º ANO B
@@ -246,19 +246,19 @@ const candidatos = [
         numero: '72',
         nome: 'DAVI LUCAS AMARAL ROCHA',
         turma: '7º Ano B',
-        foto: 'img/'
+        foto: 'img/foto_7anoB.png'
     },
     { 
         numero: '68',
         nome: 'DAVI LUCCA PAULISTA DA COSTA',
         turma: '7º Ano B',
-        foto: 'img/'
+        foto: 'img/foto_7anoB.png'
     },
     { 
         numero: '49',
         nome: 'SOPHYA GONÇALVES MELO',
         turma: '7º Ano B',
-        foto: 'img/'
+        foto: 'img/foto_7anoB.png'
     },
 
     // 8º ANO
@@ -266,19 +266,19 @@ const candidatos = [
         numero: '65',
         nome: 'DERIK TRINDADE DE OLVEIRA',
         turma: '8º Ano',
-        foto: 'img/'
+        foto: 'img/foto_8ano.png'
     },
     { 
         numero: '42',
         nome: 'MIGUEL ANTONIO RABELO IDALINO',
         turma: '8º Ano',
-        foto: 'img/'
+        foto: 'img/foto_8ano.png'
     },
     { 
         numero: '30',
         nome: 'VITÓRIA SPINA SANTOS',
         turma: '8º Ano',
-        foto: 'img/'
+        foto: 'img/foto_8ano.png'
     },
 
     // 9º ANO A
@@ -286,19 +286,19 @@ const candidatos = [
         numero: '52',
         nome: 'GUILHERME PODVERSIC COSTA REZENDE',
         turma: '9º Ano A',
-        foto: 'img/'
+        foto: 'img/foto_9anoA.png'
     },
     { 
         numero: '41',
         nome: 'LUISA FAUSTINO ALMEIDA CAMPOS',
         turma: '9º Ano A',
-        foto: 'img/'
+        foto: 'img/foto_9anoA.png'
     },
     { 
         numero: '37',
         nome: 'PABLO HENRIQUE CORREIA PACHECO',
         turma: '9º Ano A',
-        foto: 'img/'
+        foto: 'img/foto_9anoA.png'
     },
 
     // 9º ANO B
@@ -306,18 +306,18 @@ const candidatos = [
         numero: '44',
         nome: 'GABRIELA RODRIGUES MACEDO',
         turma: '9º Ano B',
-        foto: 'img/'
+        foto: 'img/foto_9anoB.png'
     },
     { 
         numero: '73',
         nome: 'IZABELLY GREGORIO DIAS',
         turma: '9º Ano B',
-        foto: 'img/'
+        foto: 'img/foto_9anoB.png''
     },
     { 
         numero: '48',
         nome: 'MARIA EDUARDA ROSA',
         turma: '9º Ano B',
-        foto: 'img/'
+        foto: 'img/foto_9anoB.png''
     },
 ];
