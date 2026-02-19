@@ -30,7 +30,7 @@ const candidatos = [
         numero: '01', 
         nome: 'ANA CAROLINA MIGUEL BERNADES', 
         turma: '1ª Série A', 
-        foto: 'img/foto_01.jpg' // Caminho relativo
+        foto: 'img/foto_01.jpeg' // Caminho relativo
     },
     { 
         numero: '02', 
@@ -146,7 +146,7 @@ const candidatos = [
         numero: '32', 
         nome: 'THIAGO DA SILVA ALMEIDA', 
         turma: '3º Internet das Coisas', 
-        foto: 'img/foto_32.jpg' 
+        foto: 'img/foto_32.jpeg' 
     },
     { 
         numero: '26', 
