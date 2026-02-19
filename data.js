@@ -312,12 +312,12 @@ const candidatos = [
         numero: '73',
         nome: 'IZABELLY GREGORIO DIAS',
         turma: '9º Ano B',
-        foto: 'img/foto_9anoB.png''
+        foto: 'img/foto_9anoB.png'
     },
     { 
         numero: '48',
         nome: 'MARIA EDUARDA ROSA',
         turma: '9º Ano B',
-        foto: 'img/foto_9anoB.png''
+        foto: 'img/foto_9anoB.png'
     },
 ];
