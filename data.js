@@ -30,7 +30,7 @@ const candidatos = [
         numero: '01', 
         nome: 'ANA CAROLINA MIGUEL BERNADES', 
         turma: '1ª Série A', 
-        foto: 'img/default_girl.png' // Caminho relativo
+        foto: 'img/foto_01.jpg' // Caminho relativo
     },
     { 
         numero: '02', 
@@ -42,7 +42,7 @@ const candidatos = [
         numero: '14', 
         nome: 'KAIO DE REZENDE GALVÃO', 
         turma: '1ª Série A', 
-        foto: 'img/default_girl.png' 
+        foto: 'img/foto_14.png' 
     },
     
     // Para alunos sem foto, você pode manter um link genérico ou usar uma imagem padrão:
@@ -52,7 +52,7 @@ const candidatos = [
         numero: '05', 
         nome: 'DANIEL ELIAS AMARAL ROCHA', 
         turma: '1ª Série B', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_05.jpeg' 
     },
     { 
         numero: '21', 
@@ -72,13 +72,13 @@ const candidatos = [
         numero: '16', 
         nome: 'JOÃO GABRIEL RIBEIRO ASSUNÇÃO', 
         turma: '1ª Série C', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_16.jpg' 
     },
     { 
         numero: '18', 
         nome: 'JULIA NEVES OLIVEIRA', 
         turma: '1ª Série C', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_18.jpeg' 
     },
     { 
         numero: '23', 
@@ -96,9 +96,9 @@ const candidatos = [
     },
     { 
         numero: '25', 
-        nome: 'MARIA LUÍSA ROSA MARTIN', 
+        nome: 'MARIA LUÍSA ROSA MARTINS DE MELO', 
         turma: '2º Automação', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_25.jpg' 
     },
     { 
         numero: '28', 
@@ -112,19 +112,19 @@ const candidatos = [
         numero: '15', 
         nome: 'GABRIEL RAMALHO LIMA', 
         turma: '2º Mineração', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_15.jpg' 
     },
     { 
         numero: '33', 
         nome: 'MARIANNA CRISTINA FONSECA', 
         turma: '2º Mineração', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_33.jpg' 
     },
     { 
         numero: '35', 
         nome: 'PYETRA MONTEIRO VAZ', 
         turma: '2º Mineração', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_35.jpg' 
     },
 
     // 2º ELETROMECÂNICA
@@ -138,7 +138,7 @@ const candidatos = [
         numero: '10', 
         nome: 'JOÃO PEDRO NORONHA SANTOS', 
         turma: '2º Eletromecânica', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_10.jpg' 
     },
 
     // 3º IOT
@@ -146,13 +146,13 @@ const candidatos = [
         numero: '32', 
         nome: 'THIAGO DA SILVA ALMEIDA', 
         turma: '3º Internet das Coisas', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_32.jpg' 
     },
     { 
         numero: '26', 
         nome: 'MATHEUS PASCOAL DE OLIVEIRA', 
         turma: '3º Internet das Coisas', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_26.jpg' 
     },
     { 
         numero: '29', 
@@ -166,19 +166,19 @@ const candidatos = [
         numero: '07', 
         nome: 'BRENNO KAYKY ARAUJO', 
         turma: '3º Mineração', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_07.jpg' 
     },
     { 
         numero: '08', 
         nome: 'ERICK VINICIUS DOS SANTOS', 
         turma: '3º Mineração', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_08.jpeg' 
     },
     { 
         numero: '27', 
         nome: 'RAQUEL HELENA GALDINO', 
         turma: '3º Mineração', 
-        foto: 'img/default_boy.png' 
+        foto: 'img/foto_27.jpeg' 
     },
     { 
         // adicione outros aqui...
