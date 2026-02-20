@@ -13,21 +13,24 @@
     
     <!-- SELEÇÃO DA TURMA -->
     <div id="telaSelecionarTurma" class="tela-selecao-turma">
-        <h2>📝 Selecione a Turma do Eleitor</h2>
+    <h2>📝 Selecione a Turma do Eleitor</h2>
 
-        <div class="turma-select-wrapper">
-            <select id="selectTurma" class="turma-select">
-                <option value="">Selecione uma turma...</option>
-                <!-- As opções serão preenchidas via JS -->
-            </select>
+    <div class="turma-select-wrapper">
+      <select id="selectTurma" class="turma-select">
+        <option value="">Selecione uma turma...</option>
+      </select>
 
-            <button class="btn-select-confirmar" onclick="confirmarTurmaSelecionada()">
-                Iniciar Votação
-            </button>
-        </div>
+      <button class="btn-select-confirmar" onclick="confirmarTurmaSelecionada()">
+        Iniciar Votação
+      </button>
     </div>
+  </div>
+
+    <!-- URNA: começa escondida -->
+  
+ 
     
-    <div class="urna-container" id="urnaContainer">
+    <div class="urna-container" id="urnaContainer" style="display:none;">
         <div class="barra-turma">
             <span>Turma: <strong id="turmaAtualLabel"></strong></span>
             <button onclick="trocarTurma()" class="btn-trocar-turma">Trocar Turma</button>
@@ -122,8 +125,10 @@
             <button class="btn-resetar" onclick="resetarVotos()">Resetar</button>
         </div>
     </div>
-
+    
+     <!-- BOTÕES FLUTUANTES (CADEADO + TROCAR TURMA) -->
     <button class="admin-btn" onclick="verResultados()">🔒</button>
+    <button class="trocar-turma-btn" onclick="trocarTurma()">🔄</button>
 
     <!-- MODAL DE SENHA (Novo) -->
     <div id="modalSenha" class="modal-senha-overlay" style="display: none;">
@@ -144,6 +149,7 @@
 </body>
 
 </html>
+
 
 
 
