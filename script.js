@@ -258,7 +258,7 @@ function fecharModalSenha() {
 }
 
 // Verifica a senha quando clica em "Entrar"
-async function conferirSenhaModal() {
+/*async function conferirSenhaModal() {
     const input = document.getElementById('inputSenhaAdmin');
     const senhaDigitada = input.value;
 
@@ -272,7 +272,29 @@ async function conferirSenhaModal() {
         input.value = '';
         input.focus();
     }
+}*/
+async function conferirSenhaModal() {
+  const input = document.getElementById('inputSenhaAdmin');
+  const senhaDigitada = input.value;
+  const senhaCorreta = await verificarSenha(senhaDigitada);
+
+  if (senhaCorreta) {
+    fecharModalSenha();
+
+    if (acaoSenhaAtual === 'resultados') {
+      abrirPainelResultados();
+    } else if (acaoSenhaAtual === 'trocarTurma') {
+      trocarTurma();
+    }
+
+    acaoSenhaAtual = null; // limpa o estado
+  } else {
+    alert('❌ Senha incorreta!');
+    input.value = '';
+    input.focus();
+  }
 }
+
 
 // Atalho: Pressionar ENTER no campo de senha
 document.getElementById('inputSenhaAdmin').addEventListener('keypress', function (e) {
