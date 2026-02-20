@@ -245,6 +245,52 @@ body {
     transition: all 0.3s;
     z-index: 50;
 }
+
+/* Botão do cadeado (já existe, só confirmando) */
+.admin-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  z-index: 50;
+}
+
+/* NOVO: botão de trocar turma, imediatamente à esquerda do cadeado */
+.trocar-turma-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 70px; /* 20px (margem) + 40px (largura do cadeado) + 10px de gap */
+  background: rgba(0,0,0,0.6);
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  z-index: 50;
+}
+
+.trocar-turma-btn:hover {
+  background: #000;
+  transform: scale(1.1);
+}
+
 .admin-btn:hover { background: #000; transform: scale(1.1); }
 
 @keyframes piscar { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
