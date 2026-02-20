@@ -24,17 +24,17 @@ let turmaAtual = null; // se ainda não existir essa linha, adicione no topo com
 
 // Gera opções de turma no <select>
 function preencherSelectTurmas() {
-    const select = document.getElementById('selectTurma');
-    if (!select) return;
+  const select = document.getElementById('selectTurma');
+  if (!select) return;
 
-    const turmasUnicas = [...new Set(candidatos.map(c => c.turma))].sort();
+  const turmasUnicas = [...new Set(candidatos.map(c => c.turma))].sort();
 
-    turmasUnicas.forEach(turma => {
-        const opt = document.createElement('option');
-        opt.value = turma;
-        opt.textContent = turma;
-        select.appendChild(opt);
-    });
+  turmasUnicas.forEach(turma => {
+    const opt = document.createElement('option');
+    opt.value = turma;
+    opt.textContent = turma;
+    select.appendChild(opt);
+  });
 }
 
 // Quando clicar em "Iniciar Votação"
