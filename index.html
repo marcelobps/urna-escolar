@@ -10,8 +10,18 @@
     <div class="header">
         <h1>Eleição de Líderes de Sala 2026 - Urna Eletrônica - SENAI/SENAI</h1>
     </div>
-
+    
+    <!-- INDICAÇÃO DA TURMA -->
+    <div id="telaSelecionarTurma" class="tela-selecao-turma">
+    <h2>📋 Selecione a Turma do Eleitor</h2>
+    <div class="grid-turmas" id="gridTurmas"></div>
+    </div>
+    
     <div class="urna-container" id="urnaContainer">
+        <div class="barra-turma">
+            <span>Turma: <strong id="turmaAtualLabel"></strong></span>
+            <button onclick="trocarTurma()" class="btn-trocar-turma">Trocar Turma</button>
+        </div>
         
         <!-- TELA DA URNA -->
         <div class="display-section">
@@ -124,4 +134,5 @@
 </body>
 
 </html>
+
 
