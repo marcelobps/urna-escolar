@@ -3,7 +3,8 @@
 let acaoSenhaAtual = null;
 
 // Hash para a senha + Salt
-const HASH_ADMIN = "01a2b2b292ad7113ed1c7c0941cdd079d16298e8c21fa5666e0ed9846fc33c50"; 
+//const HASH_ADMIN = "01a2b2b292ad7113ed1c7c0941cdd079d16298e8c21fa5666e0ed9846fc33c50"; 
+const HASH_ADMIN = "01a2b2b292ad7113
 const SALT = "UrnaEscolar2026-Seguranca-Total"; 
 
 // Variáveis de Estado
