@@ -39,20 +39,20 @@ function preencherSelectTurmas() {
 
 // Quando clicar em "Iniciar Votação"
 function confirmarTurmaSelecionada() {
-    const select = document.getElementById('selectTurma');
-    const turma = select.value;
+  const select = document.getElementById('selectTurma');
+  const turma = select.value;
 
-    if (!turma) {
-        alert('Selecione uma turma para iniciar a votação.');
-        return;
-    }
+  if (!turma) {
+    alert('Selecione uma turma para iniciar a votação.');
+    return;
+  }
 
     turmaAtual = turma;
 
     // Esconde tela inicial / mostra urna
-    document.getElementById('telaSelecionarTurma').style.display = 'block';
+    document.getElementById('telaSelecionarTurma').style.display = 'none';
     document.getElementById('urnaContainer').style.display = 'flex';
-
+  
     // Se você tiver uma barra mostrando a turma atual, atualize aqui:
     const label = document.getElementById('turmaAtualLabel');
     if (label) label.textContent = turma;
@@ -62,11 +62,10 @@ function confirmarTurmaSelecionada() {
 
 // Chamar ao carregar a página
 window.addEventListener('load', () => {
-    // Começa com a urna escondida
-    const urna = document.getElementById('urnaContainer');
-    if (urna) urna.style.display = 'none';
+  const urna = document.getElementById('urnaContainer');
+  if (urna) urna.style.display = 'none';
 
-    preencherSelectTurmas();
+  preencherSelectTurmas();
 });
 
 // Função para o mesário selecionar a turma
@@ -79,10 +78,14 @@ function selecionarTurma(turma) {
 
 // Função para voltar à seleção de turma (entre votações ou quando trocar de turma)
 function trocarTurma() {
-    turmaAtual = null;
-    corrigir();
-    document.getElementById('urnaContainer').style.display = 'none';
-    document.getElementById('telaSelecionarTurma').style.display = 'flex';
+  turmaAtual = null;
+  corrigir();
+
+  document.getElementById('urnaContainer').style.display = 'none';
+  document.getElementById('telaSelecionarTurma').style.display = 'block';
+
+  const select = document.getElementById('selectTurma');
+  if (select) select.value = '';
 }
 
 function tocarSomUrna() {
@@ -245,7 +248,6 @@ function verResultados() {
   const input = document.getElementById('inputSenhaAdmin');
 
   acaoSenhaAtual = 'resultados';
-
   modal.style.display = 'flex';
   input.value = '';
   input.focus();
@@ -287,7 +289,7 @@ async function conferirSenhaModal() {
       trocarTurma();
     }
 
-    acaoSenhaAtual = null; // limpa o estado
+    acaoSenhaAtual = null;
   } else {
     alert('❌ Senha incorreta!');
     input.value = '';
@@ -423,7 +425,6 @@ function solicitarTrocaTurma() {
   const input = document.getElementById('inputSenhaAdmin');
 
   acaoSenhaAtual = 'trocarTurma';
-
   modal.style.display = 'flex';
   input.value = '';
   input.focus();
