@@ -319,3 +319,70 @@ body {
 
 .btn-cancelar { background: #dc3545; color: white; flex: 1; }
 .btn-cancelar:hover { background: #c82333; }
+
+/* --- TELA INICIAL: SELEÇÃO DE TURMA --- */
+
+.tela-selecao-turma {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    padding: 20px 25px;
+    margin-bottom: 15px;
+    width: 100%;
+    max-width: 1100px;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+.tela-selecao-turma h2 {
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.turma-select-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.turma-select {
+    flex: 1;
+    min-width: 220px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 2px solid #667eea;
+    font-size: 1rem;
+    outline: none;
+    background: #f5f5f5;
+    color: #333;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.turma-select:focus {
+    border-color: #764ba2;
+}
+
+.btn-select-confirmar {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    background: #00cc00;
+    color: #fff;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+    transition: transform 0.1s, box-shadow 0.1s, background 0.2s;
+}
+
+.btn-select-confirmar:hover {
+    background: #00aa00;
+    transform: translateY(-1px);
+}
+
+.btn-select-confirmar:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
