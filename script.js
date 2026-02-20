@@ -20,6 +20,54 @@ contagemVotos['NULO'] = 0;
 carregarDados();
 
 // --- FUNÇÕES DA URNA (VOTAÇÃO) ---
+let turmaAtual = null; // se ainda não existir essa linha, adicione no topo com as outras variáveis
+
+// Gera opções de turma no <select>
+function preencherSelectTurmas() {
+    const select = document.getElementById('selectTurma');
+    if (!select) return;
+
+    const turmasUnicas = [...new Set(candidatos.map(c => c.turma))].sort();
+
+    turmasUnicas.forEach(turma => {
+        const opt = document.createElement('option');
+        opt.value = turma;
+        opt.textContent = turma;
+        select.appendChild(opt);
+    });
+}
+
+// Quando clicar em "Iniciar Votação"
+function confirmarTurmaSelecionada() {
+    const select = document.getElementById('selectTurma');
+    const turma = select.value;
+
+    if (!turma) {
+        alert('Selecione uma turma para iniciar a votação.');
+        return;
+    }
+
+    turmaAtual = turma;
+
+    // Esconde tela inicial / mostra urna
+    document.getElementById('telaSelecionarTurma').style.display = 'block';
+    document.getElementById('urnaContainer').style.display = 'flex';
+
+    // Se você tiver uma barra mostrando a turma atual, atualize aqui:
+    const label = document.getElementById('turmaAtualLabel');
+    if (label) label.textContent = turma;
+
+    corrigir(); // garante que a urna comece limpa
+}
+
+// Chamar ao carregar a página
+window.addEventListener('load', () => {
+    // Começa com a urna escondida
+    const urna = document.getElementById('urnaContainer');
+    if (urna) urna.style.display = 'none';
+
+    preencherSelectTurmas();
+});
 
 // Função para o mesário selecionar a turma
 function selecionarTurma(turma) {
