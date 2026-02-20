@@ -1,4 +1,7 @@
 // --- Configuração de Segurança ---
+// Nova variável global (adicionar no topo, junto das outras)
+let turmaAtual = null;
+
 // Hash para a senha + Salt
 const HASH_ADMIN = "01a2b2b292ad7113ed1c7c0941cdd079d16298e8c21fa5666e0ed9846fc33c50"; 
 const SALT = "UrnaEscolar2026-Seguranca-Total"; 
@@ -17,6 +20,22 @@ contagemVotos['NULO'] = 0;
 carregarDados();
 
 // --- FUNÇÕES DA URNA (VOTAÇÃO) ---
+
+// Função para o mesário selecionar a turma
+function selecionarTurma(turma) {
+    turmaAtual = turma;
+    document.getElementById('telaSelecionarTurma').style.display = 'none';
+    document.getElementById('urnaContainer').style.display = 'flex';
+    document.getElementById('turmaAtualLabel').textContent = turma;
+}
+
+// Função para voltar à seleção de turma (entre votações ou quando trocar de turma)
+function trocarTurma() {
+    turmaAtual = null;
+    corrigir();
+    document.getElementById('urnaContainer').style.display = 'none';
+    document.getElementById('telaSelecionarTurma').style.display = 'flex';
+}
 
 function tocarSomUrna() {
     const audio = new Audio('EfeitoUrna.mp3');
@@ -43,7 +62,7 @@ function atualizarDisplay() {
     document.getElementById('digito2').textContent = numeroDigitado[1] || '';
 }
 
-function buscarCandidato() {
+/*function buscarCandidato() {
     const candidato = candidatos.find(c => c.numero === numeroDigitado);
     
     // Mostra o rodapé e a área de dados
@@ -64,6 +83,29 @@ function buscarCandidato() {
         document.getElementById('turmaCandidato').textContent = '';
         document.getElementById('molduraFoto').style.display = 'none';
         
+        document.getElementById('msgNulo').style.display = 'block';
+    }
+}*/
+function buscarCandidato() {
+    // Filtra apenas candidatos da turma atual
+    const candidato = candidatos.find(
+        c => c.numero === numeroDigitado && c.turma === turmaAtual
+    );
+
+    document.getElementById('rodapeInstrucoes').style.display = 'block';
+    document.getElementById('dadosCandidato').style.display = 'block';
+
+    if (candidato) {
+        document.getElementById('nomeCandidato').textContent = candidato.nome;
+        document.getElementById('turmaCandidato').textContent = candidato.turma;
+        document.getElementById('imgCandidato').src = candidato.foto;
+        document.getElementById('molduraFoto').style.display = 'block';
+        document.getElementById('msgNulo').style.display = 'none';
+    } else {
+        // Número não pertence a esta turma = NULO
+        document.getElementById('nomeCandidato').textContent = '';
+        document.getElementById('turmaCandidato').textContent = '';
+        document.getElementById('molduraFoto').style.display = 'none';
         document.getElementById('msgNulo').style.display = 'block';
     }
 }
@@ -107,7 +149,7 @@ function confirmar() {
     if (votoEmBranco) {
         tipoVoto = 'BR';
     } else if (numeroDigitado.length === 2) {
-        const candidato = candidatos.find(c => c.numero === numeroDigitado);
+        const candidato = candidatos.find(c => c.numero === numeroDigitado && c.turma === turmaAtual);
         tipoVoto = candidato ? numeroDigitado : 'NULO';
     } else {
         return; // Não faz nada se não tiver voto completo
