@@ -1,10 +1,6 @@
 // --- Configuração de Segurança ---
-// controla para que a senha está sendo pedida: 'resultados' ou 'trocarTurma'
-let acaoSenhaAtual = null;
-
 // Hash para a senha + Salt
-//const HASH_ADMIN = "01a2b2b292ad7113ed1c7c0941cdd079d16298e8c21fa5666e0ed9846fc33c50"; 
-const HASH_ADMIN = "01a2b2b292ad7113
+const HASH_ADMIN = "01a2b2b292ad7113ed1c7c0941cdd079d16298e8c21fa5666e0ed9846fc33c50"; 
 const SALT = "UrnaEscolar2026-Seguranca-Total"; 
 
 // Variáveis de Estado
@@ -21,73 +17,6 @@ contagemVotos['NULO'] = 0;
 carregarDados();
 
 // --- FUNÇÕES DA URNA (VOTAÇÃO) ---
-let turmaAtual = null; // se ainda não existir essa linha, adicione no topo com as outras variáveis
-
-// Gera opções de turma no <select>
-function preencherSelectTurmas() {
-  const select = document.getElementById('selectTurma');
-  if (!select) return;
-
-  const turmasUnicas = [...new Set(candidatos.map(c => c.turma))].sort();
-
-  turmasUnicas.forEach(turma => {
-    const opt = document.createElement('option');
-    opt.value = turma;
-    opt.textContent = turma;
-    select.appendChild(opt);
-  });
-}
-
-// Quando clicar em "Iniciar Votação"
-function confirmarTurmaSelecionada() {
-  const select = document.getElementById('selectTurma');
-  const turma = select.value;
-
-  if (!turma) {
-    alert('Selecione uma turma para iniciar a votação.');
-    return;
-  }
-
-    turmaAtual = turma;
-
-    // Esconde tela inicial / mostra urna
-    document.getElementById('telaSelecionarTurma').style.display = 'none';
-    document.getElementById('urnaContainer').style.display = 'flex';
-  
-    // Se você tiver uma barra mostrando a turma atual, atualize aqui:
-    const label = document.getElementById('turmaAtualLabel');
-    if (label) label.textContent = turma;
-
-    corrigir(); // garante que a urna comece limpa
-}
-
-// Chamar ao carregar a página
-window.addEventListener('load', () => {
-  const urna = document.getElementById('urnaContainer');
-  if (urna) urna.style.display = 'none';
-
-  preencherSelectTurmas();
-});
-
-// Função para o mesário selecionar a turma
-function selecionarTurma(turma) {
-    turmaAtual = turma;
-    document.getElementById('telaSelecionarTurma').style.display = 'none';
-    document.getElementById('urnaContainer').style.display = 'flex';
-    document.getElementById('turmaAtualLabel').textContent = turma;
-}
-
-// Função para voltar à seleção de turma (entre votações ou quando trocar de turma)
-function trocarTurma() {
-  turmaAtual = null;
-  corrigir();
-
-  document.getElementById('urnaContainer').style.display = 'none';
-  document.getElementById('telaSelecionarTurma').style.display = 'block';
-
-  const select = document.getElementById('selectTurma');
-  if (select) select.value = '';
-}
 
 function tocarSomUrna() {
     const audio = new Audio('EfeitoUrna.mp3');
@@ -114,7 +43,7 @@ function atualizarDisplay() {
     document.getElementById('digito2').textContent = numeroDigitado[1] || '';
 }
 
-/*function buscarCandidato() {
+function buscarCandidato() {
     const candidato = candidatos.find(c => c.numero === numeroDigitado);
     
     // Mostra o rodapé e a área de dados
@@ -135,29 +64,6 @@ function atualizarDisplay() {
         document.getElementById('turmaCandidato').textContent = '';
         document.getElementById('molduraFoto').style.display = 'none';
         
-        document.getElementById('msgNulo').style.display = 'block';
-    }
-}*/
-function buscarCandidato() {
-    // Filtra apenas candidatos da turma atual
-    const candidato = candidatos.find(
-        c => c.numero === numeroDigitado && c.turma === turmaAtual
-    );
-
-    document.getElementById('rodapeInstrucoes').style.display = 'block';
-    document.getElementById('dadosCandidato').style.display = 'block';
-
-    if (candidato) {
-        document.getElementById('nomeCandidato').textContent = candidato.nome;
-        document.getElementById('turmaCandidato').textContent = candidato.turma;
-        document.getElementById('imgCandidato').src = candidato.foto;
-        document.getElementById('molduraFoto').style.display = 'block';
-        document.getElementById('msgNulo').style.display = 'none';
-    } else {
-        // Número não pertence a esta turma = NULO
-        document.getElementById('nomeCandidato').textContent = '';
-        document.getElementById('turmaCandidato').textContent = '';
-        document.getElementById('molduraFoto').style.display = 'none';
         document.getElementById('msgNulo').style.display = 'block';
     }
 }
@@ -201,7 +107,7 @@ function confirmar() {
     if (votoEmBranco) {
         tipoVoto = 'BR';
     } else if (numeroDigitado.length === 2) {
-        const candidato = candidatos.find(c => c.numero === numeroDigitado && c.turma === turmaAtual);
+        const candidato = candidatos.find(c => c.numero === numeroDigitado);
         tipoVoto = candidato ? numeroDigitado : 'NULO';
     } else {
         return; // Não faz nada se não tiver voto completo
@@ -236,24 +142,14 @@ function confirmar() {
 // --- SISTEMA DE LOGIN SEGURO (MODAL) ---
 
 // Abre a janelinha de senha
-/*function verResultados() {
+function verResultados() {
     const modal = document.getElementById('modalSenha');
     const input = document.getElementById('inputSenhaAdmin');
     
     modal.style.display = 'flex';
     input.value = ''; // Limpa o campo
     input.focus();    // Já deixa pronto pra digitar
-}*/
-function verResultados() {
-  const modal = document.getElementById('modalSenha');
-  const input = document.getElementById('inputSenhaAdmin');
-
-  acaoSenhaAtual = 'resultados';
-  modal.style.display = 'flex';
-  input.value = '';
-  input.focus();
 }
-
 
 // Fecha a janelinha
 function fecharModalSenha() {
@@ -261,7 +157,7 @@ function fecharModalSenha() {
 }
 
 // Verifica a senha quando clica em "Entrar"
-/*async function conferirSenhaModal() {
+async function conferirSenhaModal() {
     const input = document.getElementById('inputSenhaAdmin');
     const senhaDigitada = input.value;
 
@@ -275,29 +171,7 @@ function fecharModalSenha() {
         input.value = '';
         input.focus();
     }
-}*/
-async function conferirSenhaModal() {
-  const input = document.getElementById('inputSenhaAdmin');
-  const senhaDigitada = input.value;
-  const senhaCorreta = await verificarSenha(senhaDigitada);
-
-  if (senhaCorreta) {
-    fecharModalSenha();
-
-    if (acaoSenhaAtual === 'resultados') {
-      abrirPainelResultados();
-    } else if (acaoSenhaAtual === 'trocarTurma') {
-      trocarTurma();
-    }
-
-    acaoSenhaAtual = null;
-  } else {
-    alert('❌ Senha incorreta!');
-    input.value = '';
-    input.focus();
-  }
 }
-
 
 // Atalho: Pressionar ENTER no campo de senha
 document.getElementById('inputSenhaAdmin').addEventListener('keypress', function (e) {
@@ -406,33 +280,4 @@ function carregarDados() {
     if (salva) {
         contagemVotos = salva;
     }
-
-    // Gera botões de turma automaticamente
-function gerarBotoesTurma() {
-    const turmasUnicas = [...new Set(candidatos.map(c => c.turma))];
-    const grid = document.getElementById('gridTurmas');
-    
-    turmasUnicas.forEach(turma => {
-        const btn = document.createElement('button');
-        btn.textContent = turma;
-        btn.className = 'btn-turma';
-        btn.onclick = () => selecionarTurma(turma);
-        grid.appendChild(btn);
-    });
-}
-
-function solicitarTrocaTurma() {
-  const modal = document.getElementById('modalSenha');
-  const input = document.getElementById('inputSenhaAdmin');
-
-  acaoSenhaAtual = 'trocarTurma';
-  modal.style.display = 'flex';
-  input.value = '';
-  input.focus();
-}
-
-
-// Iniciar com a tela de seleção visível
-document.getElementById('urnaContainer').style.display = 'none';
-gerarBotoesTurma();
 }
