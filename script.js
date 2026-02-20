@@ -1,6 +1,6 @@
 // --- Configuração de Segurança ---
-// Nova variável global (adicionar no topo, junto das outras)
-let turmaAtual = null;
+// controla para que a senha está sendo pedida: 'resultados' ou 'trocarTurma'
+let acaoSenhaAtual = null;
 
 // Hash para a senha + Salt
 const HASH_ADMIN = "01a2b2b292ad7113ed1c7c0941cdd079d16298e8c21fa5666e0ed9846fc33c50"; 
@@ -232,14 +232,25 @@ function confirmar() {
 // --- SISTEMA DE LOGIN SEGURO (MODAL) ---
 
 // Abre a janelinha de senha
-function verResultados() {
+/*function verResultados() {
     const modal = document.getElementById('modalSenha');
     const input = document.getElementById('inputSenhaAdmin');
     
     modal.style.display = 'flex';
     input.value = ''; // Limpa o campo
     input.focus();    // Já deixa pronto pra digitar
+}*/
+function verResultados() {
+  const modal = document.getElementById('modalSenha');
+  const input = document.getElementById('inputSenhaAdmin');
+
+  acaoSenhaAtual = 'resultados';
+
+  modal.style.display = 'flex';
+  input.value = '';
+  input.focus();
 }
+
 
 // Fecha a janelinha
 function fecharModalSenha() {
@@ -384,6 +395,18 @@ function gerarBotoesTurma() {
         grid.appendChild(btn);
     });
 }
+
+function solicitarTrocaTurma() {
+  const modal = document.getElementById('modalSenha');
+  const input = document.getElementById('inputSenhaAdmin');
+
+  acaoSenhaAtual = 'trocarTurma';
+
+  modal.style.display = 'flex';
+  input.value = '';
+  input.focus();
+}
+
 
 // Iniciar com a tela de seleção visível
 document.getElementById('urnaContainer').style.display = 'none';
