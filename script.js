@@ -322,4 +322,22 @@ function carregarDados() {
     if (salva) {
         contagemVotos = salva;
     }
+
+    // Gera botões de turma automaticamente
+function gerarBotoesTurma() {
+    const turmasUnicas = [...new Set(candidatos.map(c => c.turma))];
+    const grid = document.getElementById('gridTurmas');
+    
+    turmasUnicas.forEach(turma => {
+        const btn = document.createElement('button');
+        btn.textContent = turma;
+        btn.className = 'btn-turma';
+        btn.onclick = () => selecionarTurma(turma);
+        grid.appendChild(btn);
+    });
+}
+
+// Iniciar com a tela de seleção visível
+document.getElementById('urnaContainer').style.display = 'none';
+gerarBotoesTurma();
 }
