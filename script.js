@@ -16,7 +16,6 @@ contagemVotos['BR'] = 0;
 contagemVotos['NULO'] = 0;
 
 // Carrega os dados salvos e inicializa as telas
-carregarDados();
 inicializarTela();
 
 function inicializarTela() {
@@ -149,13 +148,12 @@ function corrigir() {
     document.getElementById('telaFim').style.display = 'none';
 }
 
-function confirmar() {
+async function confirmar() {
     let tipoVoto = '';
     
     if (votoEmBranco) {
         tipoVoto = 'BR';
     } else if (numeroDigitado.length === 2) {
-        // FILTRO DE TURMA: Computa o voto corretamente apenas se ele pertencer a turma logada
         const candidato = candidatos.find(c => c.numero === numeroDigitado && c.turma === turmaSelecionada);
         tipoVoto = candidato ? numeroDigitado : 'NULO';
     } else {
@@ -164,17 +162,17 @@ function confirmar() {
 
     tocarSomUrna();
 
-    const voto = { tipo: tipoVoto, timestamp: Date.now() };
-    const votosTotal = JSON.parse(localStorage.getItem('votosEscolares')) || [];
-    votosTotal.push(voto);
-    localStorage.setItem('votosEscolares', JSON.stringify(votosTotal));
-
-    if (contagemVotos[tipoVoto] !== undefined) {
-        contagemVotos[tipoVoto]++;
-    } else {
-        contagemVotos['NULO']++;
+    // ENVIA O VOTO PARA O BACKEND
+    try {
+        await fetch('/api/votar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tipoVoto: tipoVoto })
+        });
+    } catch (error) {
+        console.error("Erro ao registrar voto:", error);
+        alert("Erro de conexão. O voto pode não ter sido contabilizado.");
     }
-    localStorage.setItem('contagemVotos', JSON.stringify(contagemVotos));
 
     document.getElementById('telaFim').style.display = 'flex';
     
@@ -255,63 +253,71 @@ async function verificarSenha(senhaDigitada) {
 
 // --- EXIBIÇÃO DOS RESULTADOS ---
 
-function abrirPainelResultados() {
+async function abrirPainelResultados() {
     const container = document.getElementById('resultadosContainer');
     const content = document.getElementById('resultadosContent');
 
     document.getElementById('urnaContainer').style.display = 'none';
     container.classList.add('ativo');
+    content.innerHTML = '<p style="text-align:center;">Carregando resultados do servidor...</p>';
 
-    let html = '';
-    const turmas = {};
-    
-    candidatos.forEach(c => {
-        if (!c.nome || !c.numero || !c.turma) return; 
-
-        if (!turmas[c.turma]) turmas[c.turma] = [];
-        turmas[c.turma].push({ ...c, votos: contagemVotos[c.numero] || 0 });
-    });
-
-    html += `
-        <div class="turma-resultado">
-            <h3 style="color: #555;">⚪ Votos Neutros (Todas as turmas)</h3>
-            <div class="candidato-resultado">
-                <span>Votos em Branco</span>
-                <strong>${contagemVotos['BR']}</strong>
-            </div>
-            <div class="candidato-resultado">
-                <span>Votos Nulos</span>
-                <strong>${contagemVotos['NULO']}</strong>
-            </div>
-        </div>
-    `;
-
-    const nomesTurmas = Object.keys(turmas).sort();
-    
-    if (nomesTurmas.length === 0) {
-         html += `<p style="text-align:center; margin-top:20px;">Nenhum candidato válido encontrado.</p>`;
-    }
-
-    for (let turma of nomesTurmas) {
-        html += `<h3 style="margin-top:20px; color: #667eea; border-bottom: 2px solid #eee; padding-bottom:5px;">${turma}</h3>`;
+    try {
+        // BUSCA OS VOTOS ATUALIZADOS DO BACKEND
+        const resposta = await fetch('/api/resultados');
+        contagemVotos = await resposta.json();
         
-        turmas[turma].sort((a,b) => b.votos - a.votos);
+        let html = '';
+        const turmas = {};
         
-        turmas[turma].forEach((c, index) => {
-            const isWinner = index === 0 && c.votos > 0;
-            html += `
-                <div class="candidato-resultado ${isWinner ? 'vencedor' : ''}">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        ${isWinner ? '🏆' : ''} 
-                        <span>${c.numero} - ${c.nome}</span>
-                    </div>
-                    <strong>${c.votos} votos</strong>
-                </div>
-            `;
+        candidatos.forEach(c => {
+            if (!c.nome || !c.numero || !c.turma) return; 
+            if (!turmas[c.turma]) turmas[c.turma] = [];
+            turmas[c.turma].push({ ...c, votos: contagemVotos[c.numero] || 0 });
         });
-    }
 
-    content.innerHTML = html;
+        html += `
+            <div class="turma-resultado">
+                <h3 style="color: #555;">⚪ Votos Neutros (Todas as turmas)</h3>
+                <div class="candidato-resultado">
+                    <span>Votos em Branco</span>
+                    <strong>${contagemVotos['BR'] || 0}</strong>
+                </div>
+                <div class="candidato-resultado">
+                    <span>Votos Nulos</span>
+                    <strong>${contagemVotos['NULO'] || 0}</strong>
+                </div>
+            </div>
+        `;
+
+        const nomesTurmas = Object.keys(turmas).sort();
+        
+        if (nomesTurmas.length === 0) {
+             html += `<p style="text-align:center; margin-top:20px;">Nenhum candidato válido encontrado.</p>`;
+        }
+
+        for (let turma of nomesTurmas) {
+            html += `<h3 style="margin-top:20px; color: #667eea; border-bottom: 2px solid #eee; padding-bottom:5px;">${turma}</h3>`;
+            
+            turmas[turma].sort((a,b) => b.votos - a.votos);
+            
+            turmas[turma].forEach((c, index) => {
+                const isWinner = index === 0 && c.votos > 0;
+                html += `
+                    <div class="candidato-resultado ${isWinner ? 'vencedor' : ''}">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            ${isWinner ? '🏆' : ''} 
+                            <span>${c.numero} - ${c.nome}</span>
+                        </div>
+                        <strong>${c.votos} votos</strong>
+                    </div>
+                `;
+            });
+        }
+
+        content.innerHTML = html;
+    } catch(erro) {
+        content.innerHTML = '<p style="color:red; text-align:center;">Erro ao carregar dados do servidor.</p>';
+    }
 }
 
 function voltarUrna() {
@@ -324,16 +330,14 @@ function voltarUrna() {
     corrigir();
 }
 
-function resetarVotos() {
-    if (confirm('⚠️ ATENÇÃO: Isso vai apagar TODOS os votos da escola e a turma selecionada!\n\nTem certeza?')) {
-        localStorage.clear();
-        location.reload();
-    }
-}
-
-function carregarDados() {
-    const salva = JSON.parse(localStorage.getItem('contagemVotos'));
-    if (salva) {
-        contagemVotos = salva;
+async function resetarVotos() {
+    if (confirm('⚠️ ATENÇÃO: Isso vai apagar TODOS os votos de todas as turmas no servidor!\n\nTem certeza?')) {
+        try {
+            await fetch('/api/resetar', { method: 'POST' });
+            localStorage.clear(); // Limpa a turma logada no navegador também
+            location.reload();
+        } catch (erro) {
+            alert('Erro ao resetar no servidor.');
+        }
     }
 }
