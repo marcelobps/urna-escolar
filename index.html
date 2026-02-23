@@ -8,10 +8,23 @@
 </head>
 <body>
     <div class="header">
-        <h1>Eleição de Líderes de Sala 2026 - Urna Eletrônica - SENAI/SENAI</h1>
+        <h1>Eleição de Líderes de Sala 2026 - <span id="headerTurma">Urna Eletrônica</span> - SENAI</h1>
     </div>
 
-    <div class="urna-container" id="urnaContainer">
+    <!-- TELA DE SELEÇÃO DE TURMA -->
+    <div class="selecao-turma-container" id="selecaoTurmaContainer">
+        <div class="selecao-box">
+            <h2>🏫 Selecione a Turma</h2>
+            <p>Escolha a turma que irá votar neste dispositivo:</p>
+            <select id="selectTurma" class="select-turma">
+                <option value="">-- Selecione uma Turma --</option>
+                <!-- Opções carregadas pelo JavaScript -->
+            </select>
+            <button class="btn-iniciar" onclick="confirmarTurma()">Iniciar Votação</button>
+        </div>
+    </div>
+
+    <div class="urna-container" id="urnaContainer" style="display: none;">
         
         <!-- TELA DA URNA -->
         <div class="display-section">
@@ -91,7 +104,7 @@
         </div>
     </div>
 
-    <!-- RESULTADOS (Mantenha igual) -->
+    <!-- RESULTADOS -->
     <div class="resultados-container" id="resultadosContainer">
         <div class="resultados-header">
             <h2>📊 Resultado da Eleição</h2>
@@ -99,16 +112,20 @@
         <div id="resultadosContent"></div>
         <div class="resultados-acoes">
             <button class="btn-voltar" onclick="voltarUrna()">Voltar</button>
-            <button class="btn-resetar" onclick="resetarVotos()">Resetar</button>
+            <button class="btn-resetar" onclick="resetarVotos()">Resetar Todo Sistema</button>
         </div>
     </div>
 
-    <button class="admin-btn" onclick="verResultados()">🔒</button>
+    <!-- PAINEL ADMINISTRADOR (Ícones) -->
+    <div class="botoes-admin">
+        <button class="admin-btn admin-btn-trocar" onclick="abrirModalTrocarTurma()" title="Trocar Turma">🔄</button>
+        <button class="admin-btn" onclick="verResultados()" title="Resultados da Eleição">🔒</button>
+    </div>
 
-    <!-- MODAL DE SENHA (Novo) -->
+    <!-- MODAL DE SENHA -->
     <div id="modalSenha" class="modal-senha-overlay" style="display: none;">
         <div class="modal-senha-box">
-            <h3>🔐 Área Restrita</h3>
+            <h3 id="modalSenhaTitulo">🔐 Área Restrita</h3>
             <p>Digite a senha do administrador:</p>
             <input type="password" id="inputSenhaAdmin" placeholder="Senha...">
             <div class="modal-botoes">
@@ -122,6 +139,4 @@
     <script src="data.js"></script>
     <script src="script.js"></script>
 </body>
-
 </html>
-

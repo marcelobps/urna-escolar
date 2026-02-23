@@ -7,14 +7,65 @@ const SALT = "UrnaEscolar2026-Seguranca-Total";
 let numeroDigitado = '';
 let contagemVotos = {};
 let votoEmBranco = false;
+let turmaSelecionada = localStorage.getItem('turmaAtual') || '';
+let acaoAdminPendente = ''; // Registra o que o ADM quer fazer após digitar a senha
 
 // Inicialização dos contadores
 candidatos.forEach(c => contagemVotos[c.numero] = 0);
 contagemVotos['BR'] = 0;
 contagemVotos['NULO'] = 0;
 
-// Carrega dados salvos ao abrir a página
+// Carrega os dados salvos e inicializa as telas
 carregarDados();
+inicializarTela();
+
+function inicializarTela() {
+    carregarTurmasNoSelect();
+    if (turmaSelecionada) {
+        iniciarInterfaceUrna();
+    } else {
+        mostrarSelecaoTurma();
+    }
+}
+
+// --- FUNÇÕES DE CONTROLE DE TURMA ---
+
+function carregarTurmasNoSelect() {
+    const select = document.getElementById('selectTurma');
+    // Pega as turmas únicas para não repetir, ignorando valores vazios e as organiza de A a Z
+    const turmas = [...new Set(candidatos.map(c => c.turma).filter(Boolean))].sort();
+    
+    turmas.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        select.appendChild(opt);
+    });
+}
+
+function mostrarSelecaoTurma() {
+    document.getElementById('urnaContainer').style.display = 'none';
+    document.getElementById('selecaoTurmaContainer').style.display = 'flex';
+    document.getElementById('headerTurma').textContent = 'Urna Eletrônica';
+}
+
+function confirmarTurma() {
+    const select = document.getElementById('selectTurma');
+    if (!select.value) {
+        alert('Por favor, selecione uma turma antes de iniciar!');
+        return;
+    }
+    turmaSelecionada = select.value;
+    localStorage.setItem('turmaAtual', turmaSelecionada);
+    iniciarInterfaceUrna();
+}
+
+function iniciarInterfaceUrna() {
+    document.getElementById('selecaoTurmaContainer').style.display = 'none';
+    document.getElementById('urnaContainer').style.display = 'flex';
+    document.getElementById('headerTurma').textContent = `Turma: ${turmaSelecionada}`;
+    corrigir(); // Limpa e prepara a urna
+}
 
 // --- FUNÇÕES DA URNA (VOTAÇÃO) ---
 
@@ -26,7 +77,7 @@ function tocarSomUrna() {
 }
 
 function digitarNumero(num) {
-    if (votoEmBranco) return; // Se apertou branco, bloqueia números
+    if (votoEmBranco) return; 
     
     if (numeroDigitado.length < 2) {
         numeroDigitado += num;
@@ -44,14 +95,14 @@ function atualizarDisplay() {
 }
 
 function buscarCandidato() {
-    const candidato = candidatos.find(c => c.numero === numeroDigitado);
+    // FILTRO DE TURMA: Agora o candidato só será achado se for da mesma turma que está logada na urna
+    const candidato = candidatos.find(c => c.numero === numeroDigitado && c.turma === turmaSelecionada);
     
-    // Mostra o rodapé e a área de dados
     document.getElementById('rodapeInstrucoes').style.display = 'block';
     document.getElementById('dadosCandidato').style.display = 'block';
 
     if (candidato) {
-        // Candidato ENCONTRADO
+        // Candidato ENCONTRADO e pertencente a turma escolhida
         document.getElementById('nomeCandidato').textContent = candidato.nome;
         document.getElementById('turmaCandidato').textContent = candidato.turma;
         document.getElementById('imgCandidato').src = candidato.foto;
@@ -59,7 +110,7 @@ function buscarCandidato() {
         
         document.getElementById('msgNulo').style.display = 'none';
     } else {
-        // Voto NULO
+        // Voto NULO (Número errado ou candidato de outra turma)
         document.getElementById('nomeCandidato').textContent = '';
         document.getElementById('turmaCandidato').textContent = '';
         document.getElementById('molduraFoto').style.display = 'none';
@@ -69,16 +120,15 @@ function buscarCandidato() {
 }
 
 function votarBranco() {
-    if (numeroDigitado.length > 0) return; // Só funciona se não tiver digitado nada
+    if (numeroDigitado.length > 0) return; 
     
     votoEmBranco = true;
-    atualizarDisplay(); // Garante que números sumam
+    atualizarDisplay(); 
     
     document.getElementById('rodapeInstrucoes').style.display = 'block';
     document.getElementById('dadosCandidato').style.display = 'block';
     document.getElementById('msgBranco').style.display = 'block';
     
-    // Esconder outros elementos
     document.getElementById('msgNulo').style.display = 'none';
     document.getElementById('molduraFoto').style.display = 'none';
     document.getElementById('nomeCandidato').textContent = '';
@@ -91,7 +141,6 @@ function corrigir() {
     
     atualizarDisplay();
     
-    // Esconder tudo para reiniciar
     document.getElementById('rodapeInstrucoes').style.display = 'none';
     document.getElementById('dadosCandidato').style.display = 'none';
     document.getElementById('molduraFoto').style.display = 'none';
@@ -103,25 +152,23 @@ function corrigir() {
 function confirmar() {
     let tipoVoto = '';
     
-    // Define o tipo de voto
     if (votoEmBranco) {
         tipoVoto = 'BR';
     } else if (numeroDigitado.length === 2) {
-        const candidato = candidatos.find(c => c.numero === numeroDigitado);
+        // FILTRO DE TURMA: Computa o voto corretamente apenas se ele pertencer a turma logada
+        const candidato = candidatos.find(c => c.numero === numeroDigitado && c.turma === turmaSelecionada);
         tipoVoto = candidato ? numeroDigitado : 'NULO';
     } else {
-        return; // Não faz nada se não tiver voto completo
+        return; 
     }
 
     tocarSomUrna();
 
-    // 1. Salvar voto individual (log)
     const voto = { tipo: tipoVoto, timestamp: Date.now() };
     const votosTotal = JSON.parse(localStorage.getItem('votosEscolares')) || [];
     votosTotal.push(voto);
     localStorage.setItem('votosEscolares', JSON.stringify(votosTotal));
 
-    // 2. Atualizar contagem rápida
     if (contagemVotos[tipoVoto] !== undefined) {
         contagemVotos[tipoVoto]++;
     } else {
@@ -129,10 +176,8 @@ function confirmar() {
     }
     localStorage.setItem('contagemVotos', JSON.stringify(contagemVotos));
 
-    // 3. Mostrar tela de FIM
     document.getElementById('telaFim').style.display = 'flex';
     
-    // Reiniciar após 3 segundos
     setTimeout(() => {
         corrigir();
         document.getElementById('telaFim').style.display = 'none';
@@ -141,22 +186,32 @@ function confirmar() {
 
 // --- SISTEMA DE LOGIN SEGURO (MODAL) ---
 
-// Abre a janelinha de senha
 function verResultados() {
-    const modal = document.getElementById('modalSenha');
-    const input = document.getElementById('inputSenhaAdmin');
-    
-    modal.style.display = 'flex';
-    input.value = ''; // Limpa o campo
-    input.focus();    // Já deixa pronto pra digitar
+    acaoAdminPendente = 'resultados';
+    abrirModalSenhaGeral('📊 Ver Resultados');
 }
 
-// Fecha a janelinha
+function abrirModalTrocarTurma() {
+    acaoAdminPendente = 'trocarTurma';
+    abrirModalSenhaGeral('🔄 Trocar Turma');
+}
+
+function abrirModalSenhaGeral(titulo) {
+    const modal = document.getElementById('modalSenha');
+    const input = document.getElementById('inputSenhaAdmin');
+    const tituloEl = document.getElementById('modalSenhaTitulo');
+    
+    if (titulo) tituloEl.textContent = titulo;
+
+    modal.style.display = 'flex';
+    input.value = ''; 
+    input.focus();    
+}
+
 function fecharModalSenha() {
     document.getElementById('modalSenha').style.display = 'none';
 }
 
-// Verifica a senha quando clica em "Entrar"
 async function conferirSenhaModal() {
     const input = document.getElementById('inputSenhaAdmin');
     const senhaDigitada = input.value;
@@ -165,7 +220,16 @@ async function conferirSenhaModal() {
 
     if (senhaCorreta) {
         fecharModalSenha();
-        abrirPainelResultados();
+        
+        // Direciona pra onde o ADM queria ir
+        if (acaoAdminPendente === 'resultados') {
+            abrirPainelResultados();
+        } else if (acaoAdminPendente === 'trocarTurma') {
+            turmaSelecionada = '';
+            localStorage.removeItem('turmaAtual');
+            document.getElementById('resultadosContainer').classList.remove('ativo');
+            mostrarSelecaoTurma();
+        }
     } else {
         alert('❌ Senha incorreta!');
         input.value = '';
@@ -173,14 +237,12 @@ async function conferirSenhaModal() {
     }
 }
 
-// Atalho: Pressionar ENTER no campo de senha
 document.getElementById('inputSenhaAdmin').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') {
         conferirSenhaModal();
     }
 });
 
-// Criptografia da senha (não mexer)
 async function verificarSenha(senhaDigitada) {
     const textoMisturado = senhaDigitada + SALT;
     const msgBuffer = new TextEncoder().encode(textoMisturado);
@@ -200,25 +262,19 @@ function abrirPainelResultados() {
     document.getElementById('urnaContainer').style.display = 'none';
     container.classList.add('ativo');
 
-    // Montar HTML de resultados
     let html = '';
-    
-    // Agrupar por turma
     const turmas = {};
     
     candidatos.forEach(c => {
-        // --- PROTEÇÃO CONTRA DADOS VAZIOS ---
-        // Se o candidato não tiver nome ou número, ele é ignorado
         if (!c.nome || !c.numero || !c.turma) return; 
 
         if (!turmas[c.turma]) turmas[c.turma] = [];
         turmas[c.turma].push({ ...c, votos: contagemVotos[c.numero] || 0 });
     });
 
-    // Exibir Brancos e Nulos
     html += `
         <div class="turma-resultado">
-            <h3 style="color: #555;">⚪ Votos Neutros</h3>
+            <h3 style="color: #555;">⚪ Votos Neutros (Todas as turmas)</h3>
             <div class="candidato-resultado">
                 <span>Votos em Branco</span>
                 <strong>${contagemVotos['BR']}</strong>
@@ -230,8 +286,6 @@ function abrirPainelResultados() {
         </div>
     `;
 
-    // Exibir Candidatos por Turma
-    // Verifica se existem turmas antes de tentar exibir
     const nomesTurmas = Object.keys(turmas).sort();
     
     if (nomesTurmas.length === 0) {
@@ -241,7 +295,6 @@ function abrirPainelResultados() {
     for (let turma of nomesTurmas) {
         html += `<h3 style="margin-top:20px; color: #667eea; border-bottom: 2px solid #eee; padding-bottom:5px;">${turma}</h3>`;
         
-        // Ordenar do mais votado para o menos votado
         turmas[turma].sort((a,b) => b.votos - a.votos);
         
         turmas[turma].forEach((c, index) => {
@@ -263,18 +316,21 @@ function abrirPainelResultados() {
 
 function voltarUrna() {
     document.getElementById('resultadosContainer').classList.remove('ativo');
-    document.getElementById('urnaContainer').style.display = 'flex';
-    corrigir(); // Limpa a tela
+    if (turmaSelecionada) {
+        document.getElementById('urnaContainer').style.display = 'flex';
+    } else {
+        mostrarSelecaoTurma();
+    }
+    corrigir();
 }
 
 function resetarVotos() {
-    if (confirm('⚠️ ATENÇÃO: Isso vai apagar TODOS os votos da escola!\n\nTem certeza?')) {
+    if (confirm('⚠️ ATENÇÃO: Isso vai apagar TODOS os votos da escola e a turma selecionada!\n\nTem certeza?')) {
         localStorage.clear();
         location.reload();
     }
 }
 
-// Carregar dados iniciais (Recuperar contagem se a página foi fechada)
 function carregarDados() {
     const salva = JSON.parse(localStorage.getItem('contagemVotos'));
     if (salva) {
