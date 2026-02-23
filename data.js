@@ -280,7 +280,7 @@ const candidatos = [
         turma: '8º Ano',
         foto: 'img/foto_8ano.png'
     },
-
+    //
     // 9º ANO A
     { 
         numero: '52',
