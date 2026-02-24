@@ -331,14 +331,46 @@ body {
 
 .select-turma {
     width: 100%;
-    padding: 12px;
+    /* Altura exata para caber 5 itens confortavelmente */
+    height: 180px; 
+    
     font-size: 1.1rem;
     border: 2px solid #ccc;
-    border-radius: 6px;
+    border-radius: 8px;
     margin-bottom: 20px;
     outline: none;
     cursor: pointer;
     background-color: #fff;
+    
+    /* Estilos específicos para Lista de Rolagem */
+    overflow-y: auto; /* Permite rolar */
+    padding: 5px;
+}
+
+/* Estilo da barra de rolagem da lista (opcional, para ficar bonito) */
+.select-turma::-webkit-scrollbar {
+    width: 10px;
+}
+.select-turma::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 5px;
+}
+
+/* Estilo de cada linha (Option) */
+.select-turma option {
+    padding: 10px; /* Mais espaço para clicar/tocar */
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 2px;
+    border-radius: 4px;
+}
+
+/* Quando selecionado ou passar o mouse */
+.select-turma option:checked,
+.select-turma option:hover {
+    background: #667eea !important;
+    color: white !important;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 .select-turma:focus {

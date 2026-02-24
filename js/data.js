@@ -15,14 +15,6 @@ function img(path) {
 
 const candidatos = [
 
-    // Theo teste... (excluir depois)
-    { 
-        numero: '00', 
-        nome: 'Theo', 
-        turma: '6º Ano A', 
-        foto: img('candidatos/foto_0.jpg') // Foto do Theo renomeada
-    }, 
-
     // 1ª Série A
     { 
         numero: '01', 
@@ -62,7 +54,7 @@ const candidatos = [
         numero: '24', 
         nome: 'NIRIELLE MENDES DA TRINDADE', 
         turma: '1ª Série B', 
-        foto: img('candidatos/default_boy.png') 
+        foto: img('candidatos/default_girl.png') 
     },
 
     // 1ª Série C

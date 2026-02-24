@@ -39,9 +39,8 @@ const UI = {
         this.els.resultados.classList.remove('ativo');
         this.els.selecao.style.display = 'flex';
         this.els.headerTurma.textContent = 'Urna Eletrônica';
-
-        this.els.selectTurma.innerHTML = '<option value="">-- Selecione uma Turma --</option>';
-        listaTurmas.forEach(t => {
+        
+        this.els.selectTurma.innerHTML = '<option value="" disabled selected style="color:#999; text-align:center;">-- ESCOLHA A TURMA NA LISTA --</option>';        listaTurmas.forEach(t => {
             const opt = document.createElement('option');
             opt.value = t;
             opt.textContent = t;
