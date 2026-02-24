@@ -124,29 +124,55 @@ async function carregarResultadosFirestore() {
     });
 }
 
+async function deletarColecaoEmLotes(nomeColecao, batchSize = 450) {
+  const col = db.collection(nomeColecao);
+  while (true) {
+    const snap = await col.limit(batchSize).get();
+    if (snap.empty) break;
+
+    const batch = db.batch();
+    snap.docs.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+  }
+}
 
 async function resetarVotosFirestore() {
-    if (typeof db === 'undefined') throw new Error('Firestore não inicializado: variável `db` não encontrada.');
+  if (typeof db === 'undefined') {
+    throw new Error('Firestore não inicializado: variável `db` não encontrada.');
+  }
 
+  // garante token fresco do admin
+  if (typeof auth !== "undefined" && auth.currentUser) {
+    await auth.currentUser.getIdToken(true);
+  }
+
+  // 1) tenta deletar TALLIES
+  try {
+    await deletarColecaoEmLotes('tallies');
+  } catch (e) {
+    console.warn(
+      "Não foi possível deletar tallies. Fazendo reset para 0.",
+      e
+    );
+
+    // fallback: zera votos
     const snap = await db.collection('tallies').get();
-
-    // 1) Tenta DELETAR (melhor: remove docs antigos do painel)
-    // Requer regra: allow delete: if isAdmin();
-    try {
-        const batch = db.batch();
-        snap.forEach(doc => batch.delete(doc.ref));
-        await batch.commit();
-        return;
-    } catch (e) {
-        console.warn("Não foi possível deletar documentos (provável regra de delete bloqueada). Fazendo reset para 0.", e);
-    }
-
-    // 2) Fallback: zera votos (não remove docs antigos)
-    const batch2 = db.batch();
+    const batch = db.batch();
     snap.forEach(doc => {
-        batch2.set(doc.ref, { votos: 0 }, { merge: true });
+      batch.set(doc.ref, { votos: 0 }, { merge: true });
     });
-    await batch2.commit();
+    await batch.commit();
+  }
+
+  // 2) tenta deletar VOTE_LOGS
+  try {
+    await deletarColecaoEmLotes('vote_logs');
+  } catch (e) {
+    console.warn(
+      "Não foi possível deletar vote_logs (verifique rules).",
+      e
+    );
+  }
 }
 
 
