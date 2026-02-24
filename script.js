@@ -1,7 +1,6 @@
-// --- Configuração de Segurança ---
-// Hash para a senha + Salt
-const HASH_ADMIN = "01a2b2b292ad7113ed1c7c0941cdd079d16298e8c21fa5666e0ed9846fc33c50"; 
-const SALT = "UrnaEscolar2026-Seguranca-Total"; 
+// --- Admin (Firebase Auth) ---
+// Coloque aqui o email do usuário admin que você criou no Firebase Authentication
+const ADMIN_EMAIL = "marceloborges.senai@fieg.com.br";
 
 // Variáveis de Estado
 let numeroDigitado = '';
@@ -14,6 +13,75 @@ let acaoAdminPendente = ''; // Registra o que o ADM quer fazer após digitar a s
 candidatos.forEach(c => contagemVotos[c.numero] = 0);
 contagemVotos['BR'] = 0;
 contagemVotos['NULO'] = 0;
+
+
+// --- Firebase / Firestore (sem backend) ---
+// Pré-requisito: no index.html, você já deve ter criado `db` com firebase.initializeApp(...)
+// e carregado firebase-firestore-compat.js
+
+function _idVoto(turma, tipoVoto) {
+    // separa por turma para evitar colisão caso números se repitam em turmas diferentes
+    return `${turma}__${tipoVoto}`;
+}
+
+async function registrarVotoFirestore(turma, tipoVoto) {
+    if (typeof db === 'undefined') throw new Error('Firestore não inicializado: variável `db` não encontrada.');
+    const ref = db.collection('tallies').doc(_idVoto(turma, tipoVoto));
+    await ref.set(
+        {
+            turma,
+            tipoVoto,
+            votos: firebase.firestore.FieldValue.increment(1)
+        },
+        { merge: true }
+    );
+}
+
+async function carregarResultadosFirestore() {
+    if (typeof db === 'undefined') throw new Error('Firestore não inicializado: variável `db` não encontrada.');
+
+    // Zera tudo localmente
+    contagemVotos = {};
+    candidatos.forEach(c => contagemVotos[_idVoto(c.turma, c.numero)] = 0);
+    contagemVotos['BR'] = 0;   // neutros globais (somados)
+    contagemVotos['NULO'] = 0; // neutros globais (somados)
+
+    const snap = await db.collection('tallies').get();
+
+    snap.forEach(doc => {
+        const data = doc.data() || {};
+        const turma = data.turma;
+        const tipoVoto = data.tipoVoto || doc.id;
+
+        const votos = Number(data.votos || 0);
+
+        // Se for BR/NULO, soma globalmente
+        if (tipoVoto === 'BR' || tipoVoto === 'NULO') {
+            contagemVotos[tipoVoto] = (contagemVotos[tipoVoto] || 0) + votos;
+            return;
+        }
+
+        // Se tiver turma no documento, usa o id composto; se não, tenta usar o id do doc
+        if (turma) {
+            contagemVotos[_idVoto(turma, tipoVoto)] = votos;
+        } else {
+            // fallback: mantém compatível caso você tenha salvo docs antigos sem turma
+            contagemVotos[tipoVoto] = votos;
+        }
+    });
+}
+
+async function resetarVotosFirestore() {
+    if (typeof db === 'undefined') throw new Error('Firestore não inicializado: variável `db` não encontrada.');
+    const snap = await db.collection('tallies').get();
+    const batch = db.batch();
+
+    snap.forEach(doc => {
+        batch.set(doc.ref, { votos: 0 }, { merge: true });
+    });
+
+    await batch.commit();
+}
 
 // Carrega os dados salvos e inicializa as telas
 inicializarTela();
@@ -162,19 +230,15 @@ async function confirmar() {
 
     tocarSomUrna();
 
-    // ENVIA O VOTO PARA O BACKEND
+    // REGISTRA O VOTO NO FIRESTORE
     try {
-        await fetch('/api/votar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tipoVoto: tipoVoto })
-        });
+        await registrarVotoFirestore(turmaSelecionada, tipoVoto);
     } catch (error) {
         console.error("Erro ao registrar voto:", error);
-        alert("Erro de conexão. O voto pode não ter sido contabilizado.");
+        alert("Erro de conexão com o banco. O voto pode não ter sido contabilizado.");
     }
 
-    document.getElementById('telaFim').style.display = 'flex';
+document.getElementById('telaFim').style.display = 'flex';
     
     setTimeout(() => {
         corrigir();
@@ -214,12 +278,24 @@ async function conferirSenhaModal() {
     const input = document.getElementById('inputSenhaAdmin');
     const senhaDigitada = input.value;
 
-    const senhaCorreta = await verificarSenha(senhaDigitada);
+    try {
+        // 1) Login no Firebase Authentication
+        // (Se já estiver logado, o Firebase mantém a sessão; mesmo assim, tentar logar de novo não quebra)
+        await auth.signInWithEmailAndPassword(ADMIN_EMAIL, senhaDigitada);
 
-    if (senhaCorreta) {
+        // 2) Confirma que este usuário está na coleção admins/{uid}
+        const uid = auth.currentUser?.uid;
+        if (!uid) throw new Error('Falha ao autenticar.');
+
+        const adminDoc = await db.collection('admins').doc(uid).get();
+        if (!adminDoc.exists) {
+            await auth.signOut();
+            throw new Error('Usuário autenticado não está autorizado como admin.');
+        }
+
+        // 3) OK: segue o fluxo normal
         fecharModalSenha();
-        
-        // Direciona pra onde o ADM queria ir
+
         if (acaoAdminPendente === 'resultados') {
             abrirPainelResultados();
         } else if (acaoAdminPendente === 'trocarTurma') {
@@ -228,28 +304,20 @@ async function conferirSenhaModal() {
             document.getElementById('resultadosContainer').classList.remove('ativo');
             mostrarSelecaoTurma();
         }
-    } else {
-        alert('❌ Senha incorreta!');
+    } catch (error) {
+        console.error('Erro no login admin:', error);
+        alert('❌ Acesso negado! Confira o email/senha do admin (Firebase).');
         input.value = '';
         input.focus();
     }
 }
+
 
 document.getElementById('inputSenhaAdmin').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') {
         conferirSenhaModal();
     }
 });
-
-async function verificarSenha(senhaDigitada) {
-    const textoMisturado = senhaDigitada + SALT;
-    const msgBuffer = new TextEncoder().encode(textoMisturado);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashDigitado = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    
-    return hashDigitado === HASH_ADMIN;
-}
 
 // --- EXIBIÇÃO DOS RESULTADOS ---
 
@@ -259,20 +327,18 @@ async function abrirPainelResultados() {
 
     document.getElementById('urnaContainer').style.display = 'none';
     container.classList.add('ativo');
-    content.innerHTML = '<p style="text-align:center;">Carregando resultados do servidor...</p>';
+    content.innerHTML = '<p style="text-align:center;">Carregando resultados do banco...</p>';
 
     try {
-        // BUSCA OS VOTOS ATUALIZADOS DO BACKEND
-        const resposta = await fetch('/api/resultados');
-        contagemVotos = await resposta.json();
-        
-        let html = '';
+        // BUSCA OS VOTOS ATUALIZADOS DO FIRESTORE
+        await carregarResultadosFirestore();
+let html = '';
         const turmas = {};
         
         candidatos.forEach(c => {
             if (!c.nome || !c.numero || !c.turma) return; 
             if (!turmas[c.turma]) turmas[c.turma] = [];
-            turmas[c.turma].push({ ...c, votos: contagemVotos[c.numero] || 0 });
+            turmas[c.turma].push({ ...c, votos: contagemVotos[_idVoto(c.turma, c.numero)] || 0 });
         });
 
         html += `
@@ -333,7 +399,7 @@ function voltarUrna() {
 async function resetarVotos() {
     if (confirm('⚠️ ATENÇÃO: Isso vai apagar TODOS os votos de todas as turmas no servidor!\n\nTem certeza?')) {
         try {
-            await fetch('/api/resetar', { method: 'POST' });
+            await resetarVotosFirestore();
             localStorage.clear(); // Limpa a turma logada no navegador também
             location.reload();
         } catch (erro) {

@@ -135,6 +135,29 @@
         </div>
     </div>
 
+    <!-- Firebase App (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQaGEf31ZkYIju5cJDJs_SrCLCALiwM9A",
+            authDomain: "urna-escolar-d0253.firebaseapp.com",
+            projectId: "urna-escolar-d0253",
+            storageBucket: "urna-escolar-d0253.appspot.com",
+            messagingSenderId: "998932285373",
+            appId: "1:998932285373:web:9e4bccc2507cec81b774d4"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+    </script>
+    
+
     <!-- Scripts -->
     <script src="data.js"></script>
     <script src="script.js"></script>
