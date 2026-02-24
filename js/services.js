@@ -170,25 +170,73 @@ const Services = {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
-        doc.text("Relatório Urna Eletrônica", 10, 10);
-        doc.text(`Neutros - Branco: ${dados.neutros.Branco} | Nulo: ${dados.neutros.Nulo}`, 10, 20);
+        // Título e Data
+        doc.setFontSize(18);
+        doc.text("Relatório Urna Eletrônica", 14, 20);
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Gerado em: ${new Date().toLocaleString("pt-BR")}`, 14, 28);
+        doc.setTextColor(0); // Reseta cor preta
         
-        let y = 30;
-        Object.keys(dados.turmas).sort().forEach(turma => {
-            if (y > 250) { doc.addPage(); y = 20; }
+        // Resumo de Neutros
+        doc.setFontSize(12);
+        doc.text(`Resumo Geral:`, 14, 40);
+        doc.setFontSize(10);
+        doc.text(`⚪ Brancos: ${dados.neutros.Branco}   |   ⚫ Nulos: ${dados.neutros.Nulo}`, 14, 48);
+        
+        let y = 60; // Posição vertical inicial
+        
+        const turmasOrdenadas = Object.keys(dados.turmas).sort();
+
+        turmasOrdenadas.forEach(turma => {
+            // Verifica se precisa de nova página
+            if (y > 270) { 
+                doc.addPage(); 
+                y = 20; 
+            }
+            
+            // Título da Turma
             doc.setFontSize(14);
-            doc.text(turma, 10, y);
+            doc.setTextColor(0, 51, 102); // Azul escuro
+            doc.text(turma, 14, y);
+            doc.setTextColor(0); // Preto
             
-            const body = dados.turmas[turma].map((c, i) => [String(i+1), c.numero, c.nome, String(c.votos)]);
+            // Prepara os dados da tabela
+            const listaCandidatos = dados.turmas[turma];
+            const temVencedor = listaCandidatos.length > 0 && listaCandidatos[0].votos > 0;
+
+            const body = listaCandidatos.map((c, i) => {
+                const isWinner = (i === 0 && c.votos > 0);
+                // Adiciona marcador de texto já que emoji quebra no PDF padrão
+                let nomeFormatado = c.nome;
+                if (isWinner) nomeFormatado = `[VENCEDOR]  ${c.nome}`;
+                
+                return [String(i+1), c.numero, nomeFormatado, String(c.votos)];
+            });
             
+            // Gera a Tabela
             doc.autoTable({
                 startY: y + 5,
                 head: [['Pos', 'Num', 'Nome', 'Votos']],
                 body: body,
-                margin: { top: y + 5 }
+                theme: 'grid',
+                headStyles: { fillColor: [66, 66, 66] }, // Cabeçalho cinza escuro
+                
+                // --- O SEGREDO ESTÁ AQUI (PINTAR O VENCEDOR) ---
+                didParseCell: function(data) {
+                    // Se for a linha 0 (primeira) e tiver votos, pinta de verde
+                    if (data.section === 'body' && data.row.index === 0 && temVencedor) {
+                        data.cell.styles.fillColor = [232, 245, 233]; // Verde Claro (#e8f5e9)
+                        data.cell.styles.fontStyle = 'bold';          // Negrito
+                        data.cell.styles.textColor = [0, 100, 0];     // Texto Verde Escuro
+                    }
+                },
+                
+                margin: { left: 14, right: 14 }
             });
             
-            y = doc.lastAutoTable.finalY + 15;
+            // Atualiza o Y para a próxima turma não ficar em cima
+            y = doc.lastAutoTable.finalY + 20;
         });
         
         doc.save(`Resultado_Urna_${Date.now()}.pdf`);

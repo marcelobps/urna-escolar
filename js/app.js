@@ -22,12 +22,12 @@ const App = {
     },
 
     bindEvents() {
-        // Botões Admin
+        // --- Botões Globais ---
         window.abrirModalTrocarTurma = () => { this.acaoPendente = 'trocar'; UI.toggleModalSenha(true); };
         window.verResultados = () => { this.acaoPendente = 'resultados'; UI.toggleModalSenha(true); };
         window.fecharModalSenha = () => UI.toggleModalSenha(false);
         
-        // Seleção de Turma
+        // --- Seleção de Turma ---
         window.confirmarTurma = () => {
             const val = document.getElementById('selectTurma').value;
             if (!val) return alert("Selecione uma turma!");
@@ -36,16 +36,27 @@ const App = {
             UI.iniciarUrna(val);
         };
 
-        // Teclado
+        // --- Teclado da Urna ---
         window.digitarNumero = (n) => this.handleNumero(n);
         window.votarBranco = () => this.handleBranco();
         window.corrigir = () => this.handleCorrige();
         window.confirmar = () => this.handleConfirma();
 
-        // Admin Ações
+        // --- Admin / Login ---
         window.conferirSenhaModal = () => this.handleLogin();
+        
+        // CORREÇÃO: Adicionando o ENTER no input de senha
+        const inputSenha = document.getElementById('inputSenhaAdmin');
+        if (inputSenha) {
+            inputSenha.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.handleLogin();
+            });
+        }
+
+        // --- Ações de Resultado ---
         window.voltarUrna = () => UI.iniciarUrna(this.turmaAtual);
         window.resetarVotos = () => this.handleReset();
+        
         window.exportarExcelResultados = async () => {
              const counts = await Services.carregarResultados();
              const dataset = Services.prepararDadosExportacao(candidatos, counts);
@@ -137,37 +148,60 @@ const App = {
     },
 
     async mostrarPainelResultados() {
-        UI.renderizarResultados('<p>Carregando...</p>');
+        UI.renderizarResultados('<p style="text-align:center; padding:20px;">Carregando dados do servidor...</p>');
+        
         try {
             const contagem = await Services.carregarResultados();
             const dados = Services.prepararDadosExportacao(candidatos, contagem);
             
-            // Monta HTML Simples
+            // Cabeçalho com Botões (Excel/PDF)
             let html = `
-                <div style="margin-bottom:15px; text-align:center">
-                    <button onclick="exportarExcelResultados()">Excel</button>
-                    <button onclick="exportarPDFResultados()">PDF</button>
+                <div style="display:flex; gap:10px; justify-content:center; margin:15px 0;">
+                    <button onclick="exportarExcelResultados()" style="padding:10px; cursor:pointer;">📗 Exportar Excel</button>
+                    <button onclick="exportarPDFResultados()" style="padding:10px; cursor:pointer;">📄 Exportar PDF</button>
                 </div>
-                <div class="candidato-resultado">
-                   <span>Brancos: ${dados.neutros.Branco}</span> | <span>Nulos: ${dados.neutros.Nulo}</span>
+                
+                <div class="candidato-resultado" style="background:#f9f9f9; border-bottom: 2px solid #ccc;">
+                   <span>⚪ <strong>Votos Brancos:</strong> ${dados.neutros.Branco}</span> 
+                   <span>⚫ <strong>Votos Nulos:</strong> ${dados.neutros.Nulo}</span>
                 </div>
             `;
             
-            Object.keys(dados.turmas).sort().forEach(turma => {
-                html += `<h3>${turma}</h3>`;
+            // Loop pelas Turmas
+            const nomesTurmas = Object.keys(dados.turmas).sort();
+            
+            if (nomesTurmas.length === 0) {
+                html += '<p style="text-align:center; margin-top:20px;">Nenhum voto registrado ainda.</p>';
+            }
+
+            nomesTurmas.forEach(turma => {
+                html += `<h3 style="margin-top:20px; color:#667eea; border-bottom:1px solid #ddd;">${turma}</h3>`;
+                
                 dados.turmas[turma].forEach((c, idx) => {
-                    const style = idx === 0 && c.votos > 0 ? 'background:#e8f5e9; font-weight:bold;' : '';
+                    // Lógica do Vencedor: É o primeiro da lista (idx 0) E tem mais de 0 votos?
+                    const isWinner = (idx === 0 && c.votos > 0);
+                    
+                    // Ícone e Estilo
+                    const icon = isWinner ? '🏆 ' : ''; 
+                    const style = isWinner 
+                        ? 'background:#e8f5e9; border: 2px solid #4caf50; border-radius: 5px; font-weight:bold;' 
+                        : '';
+
                     html += `
                     <div class="candidato-resultado" style="${style}">
-                        <span>${c.numero} - ${c.nome}</span>
-                        <strong>${c.votos}</strong>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:1.2rem;">${icon}</span>
+                            <span>${c.numero} - ${c.nome}</span>
+                        </div>
+                        <strong style="font-size:1.1rem;">${c.votos} votos</strong>
                     </div>`;
                 });
             });
 
             document.getElementById('resultadosContent').innerHTML = html;
         } catch (e) {
-            document.getElementById('resultadosContent').innerHTML = '<p>Erro ao carregar</p>';
+            console.error(e);
+            document.getElementById('resultadosContent').innerHTML = '<p style="color:red; text-align:center;">Erro ao carregar resultados.</p>';
         }
     },
 
