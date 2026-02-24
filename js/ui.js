@@ -23,7 +23,8 @@ const UI = {
         msgBranco: document.getElementById('msgBranco'),
         dadosCandidato: document.getElementById('dadosCandidato'),
         rodape: document.getElementById('rodapeInstrucoes'),
-        telaFim: document.getElementById('telaFim')
+        telaFim: document.getElementById('telaFim'),
+        adminBtns: document.querySelector('.botoes-admin')
     },
 
     som: new Audio('assets/audio/EfeitoUrna.mp3'), 
@@ -46,6 +47,9 @@ const UI = {
             opt.textContent = t;
             this.els.selectTurma.appendChild(opt);
         });
+
+        // MOSTRA BOTÕES FLUTUANTES NA SELEÇÃO TAMBÉM (OPCIONAL)
+        if(this.els.adminBtns) this.els.adminBtns.style.display = 'flex';
     },
 
     iniciarUrna(nomeTurma) {
@@ -54,6 +58,9 @@ const UI = {
         this.els.urna.style.display = 'flex';
         this.els.headerTurma.textContent = `Turma: ${nomeTurma}`;
         this.resetarTela();
+        
+        // MOSTRA BOTÕES FLUTUANTES QUANDO A URNA ESTÁ ATIVA
+        if(this.els.adminBtns) this.els.adminBtns.style.display = 'flex';
     },
 
     atualizarDigitos(numStr) {
@@ -115,6 +122,9 @@ const UI = {
         this.els.selecao.style.display = 'none';
         this.els.resultados.classList.remove('ativo');
         this.els.headerTurma.textContent = 'Urna Bloqueada';
+        
+        // ESCONDE BOTÕES FLUTUANTES NO BLOQUEIO
+        if(this.els.adminBtns) this.els.adminBtns.style.display = 'none'; 
     },
 
     toggleModalSenha(mostrar, tituloPersonalizado = null) {
@@ -135,6 +145,10 @@ const UI = {
     renderizarResultados(html) {
         this.els.urna.style.display = 'none';
         this.els.selecao.style.display = 'none';
+        
+        // ESCONDE BOTÕES FLUTUANTES NO RESULTADO (PARA LIMPAR O FUNDO)
+        if(this.els.adminBtns) this.els.adminBtns.style.display = 'none';
+
         this.els.resultados.classList.add('ativo');
         this.els.resultadosContent.innerHTML = html;
     }
