@@ -1,17 +1,3 @@
-
-// Nao usar nomes reais nos arquivos para evitar que o google faca indexacao automatica
-//  é uma boa pratica de seguranca para manter anonimo.
-// depois que esse projeto finalizar, mude o mais rapido para privado.. pois esta publico
-//           para conseguir o github pages.
-
-
-// : : Traducao das imagens : :
-// foto_0.jpg   =   Theo
-// foto_1.jpg   =   Ana Silva
-// foto_2.jpg   =   Carla Souza
-// foto_3.jpg   =   Daniel Alves
-// foto_4.jpg   =   ...
-
 // so ir criando novas imagens de acordo com a demanda
 // e precisa referenciar aqui no corpo abaixo 
 // ===============================
@@ -23,6 +9,9 @@ const IMG_TOKEN = "urna2026-3f8c2a9d-7b1e-4b2a-ae91-9f31d2b6d0f4";
 function img(path) {
   return `${IMG_BASE}${path}?token=${encodeURIComponent(IMG_TOKEN)}`;
 }
+
+// fotos default: menino -> /img/default_boy.png    >> foto: 'img/default_boy.png'
+//                menina -> /img/default_girl.png   >> foto: 'assets/img/default_boy.png'
 
 const candidatos = [
 
