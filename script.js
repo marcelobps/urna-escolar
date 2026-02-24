@@ -472,20 +472,6 @@ async function abrirPainelResultados() {
         for (let turma of nomesTurmas) {
             html += `<h3 style="margin-top:20px; color: #667eea; border-bottom: 2px solid #eee; padding-bottom:5px;">${turma}</h3>`;
 
-            // Neutros POR TURMA
-            const brTurma = getVotos(turma, 'BR');
-            const nuloTurma = getVotos(turma, 'NULO');
-
-            html += `
-                <div class="candidato-resultado">
-                    <span>Brancos</span>
-                    <strong>${brTurma}</strong>
-                </div>
-                <div class="candidato-resultado">
-                    <span>Nulos</span>
-                    <strong>${nuloTurma}</strong>
-                </div>
-            `;
             
             turmas[turma].sort((a,b) => b.votos - a.votos);
             
@@ -561,19 +547,10 @@ function montarDatasetResultados() {
   // Ordena por votos desc
   Object.keys(turmas).forEach(t => turmas[t].sort((a,b) => b.votos - a.votos));
 
-  // Neutros por turma + total geral
-  const neutrosPorTurma = {};
-  Object.keys(turmas).forEach(t => {
-    neutrosPorTurma[t] = {
-      Branco: Number(contagemVotos[_idVoto(t, 'BR')] || 0),
-      Nulo: Number(contagemVotos[_idVoto(t, 'NULO')] || 0),
-    };
-  });
-
   const { totalBR, totalNULO } = somarNeutrosTotais();
   const neutrosTotais = { Branco: totalBR, Nulo: totalNULO };
 
-  return { turmas, neutrosPorTurma, neutrosTotais };
+  return { turmas, neutrosTotais };
 }
 
 
@@ -599,7 +576,7 @@ async function exportarExcelResultados() {
   // Atualiza resultados antes de exportar
   await carregarResultadosFirestore();
 
-  const { turmas, neutrosPorTurma, neutrosTotais } = montarDatasetResultados();
+  const { turmas, neutrosTotais } = montarDatasetResultados();
   const wb = XLSX.utils.book_new();
 
   // Aba RESUMO
@@ -612,12 +589,7 @@ async function exportarExcelResultados() {
   linhasResumo.push(["Branco", neutrosTotais.Branco]);
   linhasResumo.push(["Nulo", neutrosTotais.Nulo]);
   linhasResumo.push([]);
-  linhasResumo.push(["Votos Neutros por Turma"]);
-  linhasResumo.push(["Turma", "Branco", "Nulo"]);
-  Object.keys(neutrosPorTurma).sort().forEach(t => {
-    linhasResumo.push([t, neutrosPorTurma[t].Branco, neutrosPorTurma[t].Nulo]);
-  });
-  linhasResumo.push([]);
+  // (opcional) Se quiser neutros por turma no futuro, dá pra adicionar aqui.
   linhasResumo.push(["Turmas (vencedor)"]);
   linhasResumo.push(["Turma", "Número", "Nome", "Votos"]);
   Object.keys(turmas).sort().forEach(t => {
@@ -637,12 +609,7 @@ async function exportarExcelResultados() {
     rows.push([`Turma: ${turma}`]);
     rows.push([`Gerado em: ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}`]);
     rows.push([]);
-    // Neutros da turma
-    rows.push(["Neutros"]);
-    rows.push(["Tipo", "Votos"]);
-    rows.push(["Branco", (neutrosPorTurma[turma]?.Branco ?? 0)]);
-    rows.push(["Nulo", (neutrosPorTurma[turma]?.Nulo ?? 0)]);
-    rows.push([]);
+	    // (neutros são exibidos no RESUMO como total geral)
     rows.push(["Posição", "Número", "Nome", "Votos"]);
 
     turmas[turma].forEach((c, idx) => {
@@ -666,7 +633,7 @@ async function exportarPDFResultados() {
   // Atualiza resultados antes de exportar
   await carregarResultadosFirestore();
 
-  const { turmas, neutrosPorTurma, neutrosTotais } = montarDatasetResultados();
+	  const { turmas, neutrosTotais } = montarDatasetResultados();
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "pt", format: "a4" });
 
@@ -701,20 +668,6 @@ async function exportarPDFResultados() {
     doc.text(`Turma: ${turma}`, 40, y);
     y += 10;
 
-    // Neutros da turma
-    const nBr = neutrosPorTurma[turma]?.Branco ?? 0;
-    const nNu = neutrosPorTurma[turma]?.Nulo ?? 0;
-
-    doc.autoTable({
-      startY: y + 5,
-      head: [["Neutros", "Votos"]],
-      body: [["Branco", String(nBr)], ["Nulo", String(nNu)]],
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [230, 230, 230] },
-      margin: { left: 40, right: 40 }
-    });
-
-    y = doc.lastAutoTable.finalY + 15;
 
     const body = turmas[turma].map((c, idx) => [
       String(idx + 1),
