@@ -110,8 +110,22 @@ const UI = {
         }, 3000);
     },
 
-    toggleModalSenha(mostrar) {
+    ocultarTudo() {
+        this.els.urna.style.display = 'none';
+        this.els.selecao.style.display = 'none';
+        this.els.resultados.classList.remove('ativo');
+        this.els.headerTurma.textContent = 'Urna Bloqueada';
+    },
+
+    toggleModalSenha(mostrar, tituloPersonalizado = null) {
         this.els.modalSenha.style.display = mostrar ? 'flex' : 'none';
+        
+        // Pequena melhoria: Permitir mudar o título do modal
+        if (mostrar && tituloPersonalizado) {
+            const tituloEl = document.getElementById('modalSenhaTitulo');
+            if (tituloEl) tituloEl.textContent = tituloPersonalizado;
+        }
+        
         if(mostrar) {
             document.getElementById('inputSenhaAdmin').value = '';
             document.getElementById('inputSenhaAdmin').focus();

@@ -4,14 +4,18 @@ const App = {
     numeroDigitado: '',
     votoEmBranco: false,
     adminEmail: "marceloborges.senai@fieg.com.br",
-    acaoPendente: null,
+    
+    // Estado inicial: pendente de desbloqueio
+    acaoPendente: 'desbloquear', 
 
     init() {
-        if (this.turmaAtual) {
-            UI.iniciarUrna(this.turmaAtual);
-        } else {
-            this.carregarSelecao();
-        }
+        // 1. Esconde tudo visualmente
+        UI.ocultarTudo();
+        
+        // 2. Força o modal de senha logo de cara
+        // O título será "🔐 Iniciar Urna"
+        UI.toggleModalSenha(true, "🔐 Iniciar Sistema");
+        
         this.bindEvents();
     },
 
@@ -130,20 +134,46 @@ const App = {
     // --- Lógica Admin ---
     async handleLogin() {
         const senha = document.getElementById('inputSenhaAdmin').value;
+        const btnEntrar = document.querySelector('.btn-entrar'); // Opcional: Feedback visual
+        if(btnEntrar) btnEntrar.textContent = "Verificando...";
+
         try {
             await Services.loginAdmin(this.adminEmail, senha);
             UI.toggleModalSenha(false);
+            if(btnEntrar) btnEntrar.textContent = "Entrar";
+
+            // --- ROTEAMENTO DE AÇÕES DEPOIS DA SENHA ---
             
-            if (this.acaoPendente === 'trocar') {
+            if (this.acaoPendente === 'desbloquear') {
+                // Cenário 1: Acabou de abrir o site (F5 ou nova aba)
+                if (this.turmaAtual) {
+                    UI.iniciarUrna(this.turmaAtual);
+                } else {
+                    this.carregarSelecao();
+                }
+                this.acaoPendente = null; // Limpa ação
+
+            } else if (this.acaoPendente === 'trocar') {
+                // Cenário 2: Quer trocar de turma
                 this.turmaAtual = '';
                 localStorage.removeItem('turmaAtual');
                 this.carregarSelecao();
+                this.acaoPendente = null;
+
             } else if (this.acaoPendente === 'resultados') {
+                // Cenário 3: Quer ver resultados
                 this.mostrarPainelResultados();
+                this.acaoPendente = null;
             }
+
         } catch (err) {
             console.error(err);
-            alert("Login falhou. Verifique senha ou permissão de Admin.");
+            if(btnEntrar) btnEntrar.textContent = "Entrar";
+            alert("Senha incorreta ou usuário não autorizado.");
+            // Se falhar no desbloqueio inicial, mantém tudo oculto
+            if (this.acaoPendente === 'desbloquear') {
+                UI.ocultarTudo();
+            }
         }
     },
 
