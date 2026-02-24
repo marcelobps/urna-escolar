@@ -1,3 +1,7 @@
+const COOLDOWN_MS = 3000;
+const LAST_VOTE_KEY = "urna_last_vote_ms";
+const DEVICE_ID_KEY = "urna_device_id";
+
 // --- Admin (Firebase Auth) ---
 // Coloque aqui o email do usuário admin que você criou no Firebase Authentication
 const ADMIN_EMAIL = "marceloborges.senai@fieg.com.br";
@@ -14,6 +18,28 @@ candidatos.forEach(c => contagemVotos[c.numero] = 0);
 contagemVotos['BR'] = 0;
 contagemVotos['NULO'] = 0;
 
+
+function getDeviceId() {
+  let id = localStorage.getItem(DEVICE_ID_KEY);
+  if (!id) {
+    id = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now();
+    localStorage.setItem(DEVICE_ID_KEY, id);
+  }
+  return id;
+}
+
+async function registrarLogVotoFirestore(turma, tipoVoto) {
+  const deviceId = getDeviceId();
+  const docId = `${Date.now()}_${deviceId}`; // simples, único o bastante
+
+  await db.collection("vote_logs").doc(docId).set({
+    turma,
+    tipoVoto,
+    deviceId,
+    tsClient: Date.now(),
+    userAgent: navigator.userAgent || ""
+  });
+}
 
 // --- Firebase / Firestore (sem backend) ---
 // Pré-requisito: no index.html, você já deve ter criado `db` com firebase.initializeApp(...)
@@ -217,26 +243,51 @@ function corrigir() {
 }
 
 async function confirmar() {
-    let tipoVoto = '';
-    
-    if (votoEmBranco) {
-        tipoVoto = 'BR';
-    } else if (numeroDigitado.length === 2) {
-        const candidato = candidatos.find(c => c.numero === numeroDigitado && c.turma === turmaSelecionada);
-        tipoVoto = candidato ? numeroDigitado : 'NULO';
-    } else {
-        return; 
-    }
+  let tipoVoto = '';
 
-    tocarSomUrna();
+  // 1) determina o tipo de voto primeiro
+  if (votoEmBranco) {
+    tipoVoto = 'BR';
+  } else if (numeroDigitado.length === 2) {
+    const candidato = candidatos.find(c => c.numero === numeroDigitado && c.turma === turmaSelecionada);
+    tipoVoto = candidato ? numeroDigitado : 'NULO';
+  } else {
+    return;
+  }
 
-    // REGISTRA O VOTO NO FIRESTORE
+  // 2) agora sim aplica cooldown (só em voto válido)
+  const agora = Date.now();
+  const ultimo = Number(localStorage.getItem(LAST_VOTE_KEY) || 0);
+  if (agora - ultimo < COOLDOWN_MS) {
+    alert("Aguarde alguns segundos para votar novamente.");
+    return;
+  }
+
+  // marca cooldown
+  localStorage.setItem(LAST_VOTE_KEY, String(agora));
+
+  tocarSomUrna();
+
+  // 3) registra no Firestore
+  try {
+    await registrarVotoFirestore(turmaSelecionada, tipoVoto);
+
+    // (opcional mas recomendado) log de auditoria
     try {
-        await registrarVotoFirestore(turmaSelecionada, tipoVoto);
-    } catch (error) {
-        console.error("Erro ao registrar voto:", error);
-        alert("Erro de conexão com o banco. O voto pode não ter sido contabilizado.");
+      await registrarLogVotoFirestore(turmaSelecionada, tipoVoto);
+    } catch (e) {
+      console.warn("Falha ao gravar log de voto:", e);
     }
+
+  } catch (error) {
+    console.error("Erro ao registrar voto:", error);
+
+    // desfaz cooldown, porque não registrou voto
+    localStorage.removeItem(LAST_VOTE_KEY);
+
+    alert("Erro de conexão com o banco. O voto pode não ter sido contabilizado.");
+    return;
+  }
 
 document.getElementById('telaFim').style.display = 'flex';
     
