@@ -30,13 +30,23 @@ function getDeviceId() {
 
 async function registrarLogVotoFirestore(turma, tipoVoto) {
   const deviceId = getDeviceId();
-  const docId = `${Date.now()}_${deviceId}`; // simples, único o bastante
+  const ts = Date.now();
+  const dt = new Date(ts);
+
+  const docId = `${ts}_${deviceId}`;
 
   await db.collection("vote_logs").doc(docId).set({
     turma,
     tipoVoto,
     deviceId,
-    tsClient: Date.now(),
+
+    // Auditoria "técnica"
+    tsClient: ts,
+
+    // Auditoria "humana"
+    tsISO: dt.toISOString(),
+    tsLocal: dt.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+
     userAgent: navigator.userAgent || ""
   });
 }
