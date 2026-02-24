@@ -383,17 +383,30 @@ document.getElementById('inputSenhaAdmin').addEventListener('keypress', function
 // --- EXIBIÇÃO DOS RESULTADOS ---
 
 async function abrirPainelResultados() {
-    const container = document.getElementById('resultadosContainer');
-    const content = document.getElementById('resultadosContent');
+  const container = document.getElementById('resultadosContainer');
+  const content = document.getElementById('resultadosContent');
 
-    document.getElementById('urnaContainer').style.display = 'none';
-    container.classList.add('ativo');
-    content.innerHTML = '<p style="text-align:center;">Carregando resultados do banco...</p>';
+  document.getElementById('urnaContainer').style.display = 'none';
+  container.classList.add('ativo');
 
-    try {
-        // BUSCA OS VOTOS ATUALIZADOS DO FIRESTORE
-        await carregarResultadosFirestore();
-let html = '';
+  // ✅ define UMA vez, com botões + mensagem
+  content.innerHTML = `
+    <div style="display:flex; gap:10px; justify-content:center; margin:10px 0;">
+      <button onclick="exportarExcelResultados()">📗 Exportar Excel</button>
+      <button onclick="exportarPDFResultados()">📄 Exportar PDF</button>
+    </div>
+    <p style="text-align:center;">Carregando resultados do banco...</p>
+  `;
+
+  try {
+    await carregarResultadosFirestore();
+
+    let html = `
+      <div style="display:flex; gap:10px; justify-content:center; margin:10px 0;">
+        <button onclick="exportarExcelResultados()">📗 Exportar Excel</button>
+        <button onclick="exportarPDFResultados()">📄 Exportar PDF</button>
+      </div>
+    `;
         const turmas = {};
         
         candidatos.forEach(c => {
@@ -467,4 +480,176 @@ async function resetarVotos() {
             alert('Erro ao resetar no servidor.');
         }
     }
+}
+
+function formatarDataArquivo() {
+  const dt = new Date();
+  // America/Sao_Paulo
+  const s = dt.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+  // "23/02/2026 19:05:12" -> "2026-02-23_19-05-12"
+  const [d, t] = s.split(" ");
+  const [dd, mm, yyyy] = d.split("/");
+  const [hh, mi, ss] = t.split(":");
+  return `${yyyy}-${mm}-${dd}_${hh}-${mi}-${ss}`;
+}
+
+function montarDatasetResultados() {
+  // Garante que contagemVotos está atualizado
+  // (chame carregarResultadosFirestore() antes de exportar)
+
+  // Agrupa candidatos por turma (somente válidos)
+  const turmas = {};
+  candidatos.forEach(c => {
+    if (!c.nome || !c.numero || !c.turma) return;
+    if (!turmas[c.turma]) turmas[c.turma] = [];
+    turmas[c.turma].push({
+      numero: c.numero,
+      nome: c.nome,
+      votos: Number(contagemVotos[c.numero] || 0)
+    });
+  });
+
+  // Ordena por votos desc
+  Object.keys(turmas).forEach(t => turmas[t].sort((a,b) => b.votos - a.votos));
+
+  const neutros = [
+    { tipo: "Branco", votos: Number(contagemVotos["BR"] || 0) },
+    { tipo: "Nulo", votos: Number(contagemVotos["NULO"] || 0) },
+  ];
+
+  return { turmas, neutros };
+}
+
+function garantirLibXLSX() {
+  if (typeof XLSX === "undefined") {
+    alert("Biblioteca XLSX não carregou. Verifique os <script> no index.html.");
+    return false;
+  }
+  return true;
+}
+
+function garantirLibPDF() {
+  if (typeof window.jspdf === "undefined") {
+    alert("Biblioteca jsPDF não carregou. Verifique os <script> no index.html.");
+    return false;
+  }
+  return true;
+}
+
+async function exportarExcelResultados() {
+  if (!garantirLibXLSX()) return;
+
+  // Atualiza resultados antes de exportar
+  await carregarResultadosFirestore();
+
+  const { turmas, neutros } = montarDatasetResultados();
+  const wb = XLSX.utils.book_new();
+
+  // Aba RESUMO
+  const linhasResumo = [];
+  linhasResumo.push(["Urna Escolar - Resultados"]);
+  linhasResumo.push([`Gerado em: ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}`]);
+  linhasResumo.push([]);
+  linhasResumo.push(["Votos Neutros"]);
+  linhasResumo.push(["Tipo", "Votos"]);
+  neutros.forEach(n => linhasResumo.push([n.tipo, n.votos]));
+  linhasResumo.push([]);
+  linhasResumo.push(["Turmas (vencedor)"]);
+  linhasResumo.push(["Turma", "Número", "Nome", "Votos"]);
+  Object.keys(turmas).sort().forEach(t => {
+    const winner = turmas[t][0];
+    if (winner) linhasResumo.push([t, winner.numero, winner.nome, winner.votos]);
+  });
+
+  const wsResumo = XLSX.utils.aoa_to_sheet(linhasResumo);
+  // larguras
+  wsResumo["!cols"] = [{ wch: 28 }, { wch: 10 }, { wch: 35 }, { wch: 10 }];
+  XLSX.utils.book_append_sheet(wb, wsResumo, "RESUMO");
+
+  // Uma aba por turma
+  const nomesTurmas = Object.keys(turmas).sort();
+  nomesTurmas.forEach((turma) => {
+    const rows = [];
+    rows.push([`Turma: ${turma}`]);
+    rows.push([`Gerado em: ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}`]);
+    rows.push([]);
+    rows.push(["Posição", "Número", "Nome", "Votos"]);
+
+    turmas[turma].forEach((c, idx) => {
+      rows.push([idx + 1, c.numero, c.nome, c.votos]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws["!cols"] = [{ wch: 10 }, { wch: 10 }, { wch: 40 }, { wch: 10 }];
+    const nomeAba = turma.slice(0, 31); // Excel limita nome de aba a 31 chars
+    XLSX.utils.book_append_sheet(wb, ws, nomeAba);
+  });
+
+  // Baixar
+  const nomeArquivo = `resultados_urna_${formatarDataArquivo()}.xlsx`;
+  XLSX.writeFile(wb, nomeArquivo);
+}
+
+async function exportarPDFResultados() {
+  if (!garantirLibPDF()) return;
+
+  // Atualiza resultados antes de exportar
+  await carregarResultadosFirestore();
+
+  const { turmas, neutros } = montarDatasetResultados();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+  const geradoEm = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+
+  doc.setFontSize(16);
+  doc.text("Urna Escolar - Resultados", 40, 50);
+  doc.setFontSize(10);
+  doc.text(`Gerado em: ${geradoEm}`, 40, 70);
+
+  // Neutros
+  doc.setFontSize(12);
+  doc.text("Votos Neutros", 40, 100);
+
+  doc.autoTable({
+    startY: 110,
+    head: [["Tipo", "Votos"]],
+    body: neutros.map(n => [n.tipo, String(n.votos)]),
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [230, 230, 230] },
+    margin: { left: 40, right: 40 }
+  });
+
+  // Cada turma
+  const turmasOrdenadas = Object.keys(turmas).sort();
+  let y = doc.lastAutoTable.finalY + 30;
+
+  for (const turma of turmasOrdenadas) {
+    if (y > 740) { doc.addPage(); y = 50; }
+
+    doc.setFontSize(12);
+    doc.text(`Turma: ${turma}`, 40, y);
+    y += 10;
+
+    const body = turmas[turma].map((c, idx) => [
+      String(idx + 1),
+      c.numero,
+      c.nome,
+      String(c.votos)
+    ]);
+
+    doc.autoTable({
+      startY: y + 10,
+      head: [["Pos", "Número", "Nome", "Votos"]],
+      body,
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [230, 230, 230] },
+      margin: { left: 40, right: 40 }
+    });
+
+    y = doc.lastAutoTable.finalY + 30;
+  }
+
+  const nomeArquivo = `resultados_urna_${formatarDataArquivo()}.pdf`;
+  doc.save(nomeArquivo);
 }
