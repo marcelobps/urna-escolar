@@ -13,11 +13,8 @@ let votoEmBranco = false;
 let turmaSelecionada = localStorage.getItem('turmaAtual') || '';
 let acaoAdminPendente = ''; // Registra o que o ADM quer fazer após digitar a senha
 
-// Inicialização dos contadores
-candidatos.forEach(c => contagemVotos[c.numero] = 0);
-contagemVotos['BR'] = 0;
-contagemVotos['NULO'] = 0;
-
+// Inicialização dos contadores (por turma + tipoVoto)
+initContagemVotos();
 
 function getDeviceId() {
   let id = localStorage.getItem(DEVICE_ID_KEY);
@@ -60,6 +57,40 @@ function _idVoto(turma, tipoVoto) {
     return `${turma}__${tipoVoto}`;
 }
 
+function getTurmasUnicas() {
+    return [...new Set(candidatos.map(c => c.turma).filter(Boolean))].sort();
+}
+
+function initContagemVotos() {
+    contagemVotos = {};
+    // candidatos por turma (número pode repetir em turmas diferentes)
+    candidatos.forEach(c => {
+        if (!c.turma || !c.numero) return;
+        contagemVotos[_idVoto(c.turma, c.numero)] = 0;
+    });
+
+    // neutros por turma
+    getTurmasUnicas().forEach(t => {
+        contagemVotos[_idVoto(t, 'BR')] = 0;
+        contagemVotos[_idVoto(t, 'NULO')] = 0;
+    });
+}
+
+function getVotos(turma, tipoVoto) {
+    return Number(contagemVotos[_idVoto(turma, tipoVoto)] || 0);
+}
+
+function somarNeutrosTotais() {
+    let totalBR = 0;
+    let totalNULO = 0;
+    getTurmasUnicas().forEach(t => {
+        totalBR += getVotos(t, 'BR');
+        totalNULO += getVotos(t, 'NULO');
+    });
+    return { totalBR, totalNULO };
+}
+
+
 async function registrarVotoFirestore(turma, tipoVoto) {
     if (typeof db === 'undefined') throw new Error('Firestore não inicializado: variável `db` não encontrada.');
     const ref = db.collection('tallies').doc(_idVoto(turma, tipoVoto));
@@ -76,11 +107,8 @@ async function registrarVotoFirestore(turma, tipoVoto) {
 async function carregarResultadosFirestore() {
     if (typeof db === 'undefined') throw new Error('Firestore não inicializado: variável `db` não encontrada.');
 
-    // Zera tudo localmente
-    contagemVotos = {};
-    candidatos.forEach(c => contagemVotos[_idVoto(c.turma, c.numero)] = 0);
-    contagemVotos['BR'] = 0;   // neutros globais (somados)
-    contagemVotos['NULO'] = 0; // neutros globais (somados)
+    // Zera tudo localmente (inclui BR/NULO por turma)
+    initContagemVotos();
 
     const snap = await db.collection('tallies').get();
 
@@ -88,36 +116,39 @@ async function carregarResultadosFirestore() {
         const data = doc.data() || {};
         const turma = data.turma;
         const tipoVoto = data.tipoVoto || doc.id;
-
         const votos = Number(data.votos || 0);
 
-        // Se for BR/NULO, soma globalmente
-        if (tipoVoto === 'BR' || tipoVoto === 'NULO') {
-            contagemVotos[tipoVoto] = (contagemVotos[tipoVoto] || 0) + votos;
-            return;
-        }
-
-        // Se tiver turma no documento, usa o id composto; se não, tenta usar o id do doc
-        if (turma) {
+        if (turma && tipoVoto) {
             contagemVotos[_idVoto(turma, tipoVoto)] = votos;
-        } else {
-            // fallback: mantém compatível caso você tenha salvo docs antigos sem turma
-            contagemVotos[tipoVoto] = votos;
         }
     });
 }
+
 
 async function resetarVotosFirestore() {
     if (typeof db === 'undefined') throw new Error('Firestore não inicializado: variável `db` não encontrada.');
+
     const snap = await db.collection('tallies').get();
-    const batch = db.batch();
 
+    // 1) Tenta DELETAR (melhor: remove docs antigos do painel)
+    // Requer regra: allow delete: if isAdmin();
+    try {
+        const batch = db.batch();
+        snap.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+        return;
+    } catch (e) {
+        console.warn("Não foi possível deletar documentos (provável regra de delete bloqueada). Fazendo reset para 0.", e);
+    }
+
+    // 2) Fallback: zera votos (não remove docs antigos)
+    const batch2 = db.batch();
     snap.forEach(doc => {
-        batch.set(doc.ref, { votos: 0 }, { merge: true });
+        batch2.set(doc.ref, { votos: 0 }, { merge: true });
     });
-
-    await batch.commit();
+    await batch2.commit();
 }
+
 
 // Carrega os dados salvos e inicializa as telas
 inicializarTela();
@@ -415,16 +446,19 @@ async function abrirPainelResultados() {
             turmas[c.turma].push({ ...c, votos: contagemVotos[_idVoto(c.turma, c.numero)] || 0 });
         });
 
+                // Totais gerais (opcional)
+        const { totalBR, totalNULO } = somarNeutrosTotais();
+
         html += `
             <div class="turma-resultado">
-                <h3 style="color: #555;">⚪ Votos Neutros (Todas as turmas)</h3>
+                <h3 style="color: #555;">⚪ Votos Neutros (Total geral)</h3>
                 <div class="candidato-resultado">
                     <span>Votos em Branco</span>
-                    <strong>${contagemVotos['BR'] || 0}</strong>
+                    <strong>${totalBR}</strong>
                 </div>
                 <div class="candidato-resultado">
                     <span>Votos Nulos</span>
-                    <strong>${contagemVotos['NULO'] || 0}</strong>
+                    <strong>${totalNULO}</strong>
                 </div>
             </div>
         `;
@@ -437,6 +471,21 @@ async function abrirPainelResultados() {
 
         for (let turma of nomesTurmas) {
             html += `<h3 style="margin-top:20px; color: #667eea; border-bottom: 2px solid #eee; padding-bottom:5px;">${turma}</h3>`;
+
+            // Neutros POR TURMA
+            const brTurma = getVotos(turma, 'BR');
+            const nuloTurma = getVotos(turma, 'NULO');
+
+            html += `
+                <div class="candidato-resultado">
+                    <span>Brancos</span>
+                    <strong>${brTurma}</strong>
+                </div>
+                <div class="candidato-resultado">
+                    <span>Nulos</span>
+                    <strong>${nuloTurma}</strong>
+                </div>
+            `;
             
             turmas[turma].sort((a,b) => b.votos - a.votos);
             
@@ -505,20 +554,28 @@ function montarDatasetResultados() {
     turmas[c.turma].push({
       numero: c.numero,
       nome: c.nome,
-      votos: Number(contagemVotos[c.numero] || 0)
+      votos: Number(contagemVotos[_idVoto(c.turma, c.numero)] || 0)
     });
   });
 
   // Ordena por votos desc
   Object.keys(turmas).forEach(t => turmas[t].sort((a,b) => b.votos - a.votos));
 
-  const neutros = [
-    { tipo: "Branco", votos: Number(contagemVotos["BR"] || 0) },
-    { tipo: "Nulo", votos: Number(contagemVotos["NULO"] || 0) },
-  ];
+  // Neutros por turma + total geral
+  const neutrosPorTurma = {};
+  Object.keys(turmas).forEach(t => {
+    neutrosPorTurma[t] = {
+      Branco: Number(contagemVotos[_idVoto(t, 'BR')] || 0),
+      Nulo: Number(contagemVotos[_idVoto(t, 'NULO')] || 0),
+    };
+  });
 
-  return { turmas, neutros };
+  const { totalBR, totalNULO } = somarNeutrosTotais();
+  const neutrosTotais = { Branco: totalBR, Nulo: totalNULO };
+
+  return { turmas, neutrosPorTurma, neutrosTotais };
 }
+
 
 function garantirLibXLSX() {
   if (typeof XLSX === "undefined") {
@@ -542,7 +599,7 @@ async function exportarExcelResultados() {
   // Atualiza resultados antes de exportar
   await carregarResultadosFirestore();
 
-  const { turmas, neutros } = montarDatasetResultados();
+  const { turmas, neutrosPorTurma, neutrosTotais } = montarDatasetResultados();
   const wb = XLSX.utils.book_new();
 
   // Aba RESUMO
@@ -550,9 +607,16 @@ async function exportarExcelResultados() {
   linhasResumo.push(["Urna Escolar - Resultados"]);
   linhasResumo.push([`Gerado em: ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}`]);
   linhasResumo.push([]);
-  linhasResumo.push(["Votos Neutros"]);
+  linhasResumo.push(["Votos Neutros (Total geral)"]);
   linhasResumo.push(["Tipo", "Votos"]);
-  neutros.forEach(n => linhasResumo.push([n.tipo, n.votos]));
+  linhasResumo.push(["Branco", neutrosTotais.Branco]);
+  linhasResumo.push(["Nulo", neutrosTotais.Nulo]);
+  linhasResumo.push([]);
+  linhasResumo.push(["Votos Neutros por Turma"]);
+  linhasResumo.push(["Turma", "Branco", "Nulo"]);
+  Object.keys(neutrosPorTurma).sort().forEach(t => {
+    linhasResumo.push([t, neutrosPorTurma[t].Branco, neutrosPorTurma[t].Nulo]);
+  });
   linhasResumo.push([]);
   linhasResumo.push(["Turmas (vencedor)"]);
   linhasResumo.push(["Turma", "Número", "Nome", "Votos"]);
@@ -572,6 +636,12 @@ async function exportarExcelResultados() {
     const rows = [];
     rows.push([`Turma: ${turma}`]);
     rows.push([`Gerado em: ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}`]);
+    rows.push([]);
+    // Neutros da turma
+    rows.push(["Neutros"]);
+    rows.push(["Tipo", "Votos"]);
+    rows.push(["Branco", (neutrosPorTurma[turma]?.Branco ?? 0)]);
+    rows.push(["Nulo", (neutrosPorTurma[turma]?.Nulo ?? 0)]);
     rows.push([]);
     rows.push(["Posição", "Número", "Nome", "Votos"]);
 
@@ -596,7 +666,7 @@ async function exportarPDFResultados() {
   // Atualiza resultados antes de exportar
   await carregarResultadosFirestore();
 
-  const { turmas, neutros } = montarDatasetResultados();
+  const { turmas, neutrosPorTurma, neutrosTotais } = montarDatasetResultados();
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "pt", format: "a4" });
 
@@ -614,7 +684,7 @@ async function exportarPDFResultados() {
   doc.autoTable({
     startY: 110,
     head: [["Tipo", "Votos"]],
-    body: neutros.map(n => [n.tipo, String(n.votos)]),
+    body: [["Branco", String(neutrosTotais.Branco)], ["Nulo", String(neutrosTotais.Nulo)]],
     styles: { fontSize: 10 },
     headStyles: { fillColor: [230, 230, 230] },
     margin: { left: 40, right: 40 }
@@ -630,6 +700,21 @@ async function exportarPDFResultados() {
     doc.setFontSize(12);
     doc.text(`Turma: ${turma}`, 40, y);
     y += 10;
+
+    // Neutros da turma
+    const nBr = neutrosPorTurma[turma]?.Branco ?? 0;
+    const nNu = neutrosPorTurma[turma]?.Nulo ?? 0;
+
+    doc.autoTable({
+      startY: y + 5,
+      head: [["Neutros", "Votos"]],
+      body: [["Branco", String(nBr)], ["Nulo", String(nNu)]],
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [230, 230, 230] },
+      margin: { left: 40, right: 40 }
+    });
+
+    y = doc.lastAutoTable.finalY + 15;
 
     const body = turmas[turma].map((c, idx) => [
       String(idx + 1),
